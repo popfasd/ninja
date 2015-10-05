@@ -1,0 +1,15 @@
+{
+    "package": "popfasd/ninja",
+    "description": "",
+    "autoload": {
+        "psr-4": {
+            "Popfasd\\Ninja\\": "src/"
+        }
+    },
+    "require": {
+        "mattferris/http-routing": "0.3"
+    },
+    "require-dev": {
+        "phpunit/phpunut": "5.0"
+    }
+}
