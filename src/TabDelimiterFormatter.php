@@ -9,14 +9,10 @@ class TabDelimiterFormatter implements FormatterInterface
      * @param array $fields
      * @return string
      */
-    public function format($row, $fields = null) {
+    public function format(array $row, array $fields = null) {
         $outRow = [];
-        if (is_array($fields)) {
-            foreach ($fields as $name) {
-                $outRow[] = $row[$name];
-            }
-        } else {
-            $outRow = $row;
+        foreach ($fields as $name) {
+            $outRow[] = $row[$name];
         }
         $return = implode("\t", $outRow)."\n";
         return $return;

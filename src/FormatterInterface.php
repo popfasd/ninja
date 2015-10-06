@@ -9,6 +9,6 @@ interface FormatterInterface
      * @param array $fields
      * @return string
      */
-    public function format($row, $fields = null);
+    public function format(array $row, array $fields);
 }
 

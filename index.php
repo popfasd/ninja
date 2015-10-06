@@ -22,10 +22,19 @@ $di->set('EventLogger', function ($di) {
     return $logger;
 }, true);
 
-$di->set('Processor', function ($di) {
-    $processor = new \Popfasd\Ninja\Processor(
+$di->set('FileProcessor', function ($di) {
+    $processor = new \Popfasd\Ninja\FileProcessor(
         new \Popfasd\Ninja\TabDelimiterFormatter(),
         $di->getParameter('formDir')
+    );
+    return $processor;
+}, true);
+
+$di->set('EmailProcessor', function ($di) {
+    $processor = new \Popfasd\Ninja\EmailProcessor(
+        new \Popfasd\Ninja\EmailFormatter(),
+        $di->getParameter('formDir'),
+        $di->getParameter('mailto')
     );
     return $processor;
 }, true);

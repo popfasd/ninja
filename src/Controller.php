@@ -23,7 +23,8 @@ class Controller
     public function postSubmitAction(RequestInterface $request) {
         global $parameters;
 
-        $this->di->get('Processor')->process($request);
+        $this->di->get('FileProcessor')->process($request);
+        $this->di->get('EmailProcessor')->process($request);
 
         $response = new Response('Form submitted', 303, 'text/plain');
 

@@ -6,6 +6,10 @@ use MattFerris\HttpRouting\RequestInterface;
 
 interface ProcessorInterface
 {
-    public function process(RequestInterface $request, $fields);
+    /**
+     * @param RequestInterface $request
+     * @param array $fields
+     */
+    public function process(RequestInterface $request, array $fields = null);
 }
 
