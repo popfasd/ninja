@@ -3,5 +3,5 @@
 $parameters = [
     'mailto' => [],
     'uriPrefix' => '',
-    'outputDir' => ''
+    'formDir' => 'private/cache'
 ];
