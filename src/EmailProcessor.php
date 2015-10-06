@@ -48,6 +48,10 @@ class EmailProcessor implements ProcessorInterface
             }
         }
 
+        // add time field
+        $fields['ninja_ts'] = 'Timestamp';
+        $inRow['ninja_ts'] = date('Y/M/d H:i:s');
+
         // populate $row by field names
         $row = [];
         foreach ($fields as $key => $name) {
