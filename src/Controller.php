@@ -23,6 +23,8 @@ class Controller
     public function postSubmitAction(RequestInterface $request) {
         global $parameters;
 
+        $this->di->get('Processor')->process($request);
+
         $response = new Response('Form submitted', 303, 'text/plain');
 
         $nexturl = $request->get('nexturl');

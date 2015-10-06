@@ -7,7 +7,7 @@ $di = new MattFerris\Di\Di();
 $di->setParameters($parameters);
 
 $di->set('Dispatcher', function ($di) {
-    $dispatcher = new \MattFerris\HttpRouting\Dispatcher();
+    $dispatcher = new \MattFerris\HttpRouting\Dispatcher($di);
     $dispatcher->register(new \Popfasd\Ninja\RoutingBundle());
     return $dispatcher;
 }, true);
@@ -21,6 +21,15 @@ $di->set('EventLogger', function ($di) {
     $logger = new \MattFerris\Events\Logger($di->get('EventDispatcher'));
     return $logger;
 }, true);
+
+$di->set('Processor', function ($di) {
+    $processor = new \Popfasd\Ninja\Processor(
+        new \Popfasd\Ninja\TabDelimiterFormatter(),
+        $di->getParameter('formDir')
+    );
+    return $processor;
+}, true);
+
 
 MattFerris\HttpRouting\DomainEvents::setDispatcher($di->get('EventDispatcher'));
 MattFerris\HttpRouting\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));

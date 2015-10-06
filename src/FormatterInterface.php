@@ -5,15 +5,10 @@ namespace Popfasd\Ninja;
 interface FormatterInterface
 {
     /**
-     * @param string $input
+     * @param array $row
+     * @param array $fields
      * @return string
      */
-    public function format($input);
-
-    /**
-     * @param stream $stream
-     * @return stream
-     */
-    public function formatStream(resource $stream);
+    public function format($row, $fields = null);
 }
 
