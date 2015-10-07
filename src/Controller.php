@@ -10,30 +10,30 @@ class Controller
 {
     protected $di;
 
-    public function __construct(ContainerInterface $di) {
+    public function __construct(ContainerInterface $di)
+    {
         $this->di = $di;
     }
 
-    public function getSubmitAction(RequestInterface $request) {
+    public function getSubmitAction(RequestInterface $request)
+    {
         $response = new Response('This URI only accepts POST method', 405, 'text/plain');
         $response->setHeader('Allow', 'POST');
         return $response;
     }
 
-    public function postSubmitAction(RequestInterface $request) {
-        global $parameters;
+    public function postSubmitAction(RequestInterface $request)
+    {
+        $form = new Form($request, $request->getAttribute('formDir'));
+        $form->process();
 
-        $this->di->get('FileProcessor')->process($request);
-        $this->di->get('EmailProcessor')->process($request);
-
-        $response = new Response('Form submitted', 303, 'text/plain');
-
-        $nexturl = $request->get('nexturl');
+        $nexturl = $form->getNextUrl();
         if (!isset($nexturl) || empty($nexturl)) {
-            $prefix = str_replace('/index.php', '', $parameters['uriPrefix']);
+            $prefix = str_replace('/index.php', '', $request->getAttribute('uriPrefix'));
             $nexturl = $prefix.'/public/thanks.html';
         }
 
+        $response = new Response('Form submitted', 303, 'text/plain');
         $response->setHeader('Location', $nexturl);
 
         return $response;

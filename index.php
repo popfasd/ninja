@@ -22,29 +22,37 @@ $di->set('EventLogger', function ($di) {
     return $logger;
 }, true);
 
-$di->set('FileProcessor', function ($di) {
-    $processor = new \Popfasd\Ninja\FileProcessor(
-        new \Popfasd\Ninja\TabDelimiterFormatter(),
-        $di->getParameter('formDir')
-    );
-    return $processor;
-}, true);
-
-$di->set('EmailProcessor', function ($di) {
-    $processor = new \Popfasd\Ninja\EmailProcessor(
-        new \Popfasd\Ninja\EmailFormatter(),
-        $di->getParameter('formDir'),
+$di->set('AdminNotifyListener', function ($di) {
+    $listener = new Popfasd\Ninja\AdminNotifyListener(
         $di->getParameter('mailto')
     );
-    return $processor;
+    return $listener;
 }, true);
 
+$di->set('FileListener', function ($di) {
+    return new Popfasd\Ninja\FileListener();
+}, true);
 
-MattFerris\HttpRouting\DomainEvents::setDispatcher($di->get('EventDispatcher'));
+$ed = $di->get('EventDispatcher');
+
+$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
+    $di->get('AdminNotifyListener'), 'onSubmissionProcessed'
+));
+$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
+    $di->get('FileListener'), 'onSubmissionProcessed'
+));
+
+MattFerris\HttpRouting\DomainEvents::setDispatcher($ed);
 MattFerris\HttpRouting\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
+Popfasd\Ninja\DomainEvents::setDispatcher($ed);
+Popfasd\Ninja\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
 
 $server = $_SERVER;
 $server['REQUEST_URI'] = $_GET['q'];
 $request = new MattFerris\HttpRouting\Request($server);
+
+foreach ($parameters as $key => $val) {
+    $request->setAttribute($key, $val);
+}
 
 echo $di->get('Dispatcher')->dispatch($request)->send();
