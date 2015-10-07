@@ -33,6 +33,10 @@ $di->set('FileListener', function ($di) {
     return new Popfasd\Ninja\FileListener();
 }, true);
 
+$di->set('SubmissionReceiptListener', function ($di) {
+    return new Popfasd\Ninja\SubmissionReceiptListener();
+}, true);
+
 $ed = $di->get('EventDispatcher');
 
 $ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
@@ -40,6 +44,9 @@ $ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
 ));
 $ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
     $di->get('FileListener'), 'onSubmissionProcessed'
+));
+$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
+    $di->get('SubmissionReceiptListener'), 'onSubmissionProcessed'
 ));
 
 MattFerris\HttpRouting\DomainEvents::setDispatcher($ed);
