@@ -53,13 +53,6 @@ class Form
             file_put_contents($this->cacheDir.'/settings.php', $settings);
         }
 
-        if (!isset($fields['__id'])) {
-            $fields['__id'] = 'Submission ID';
-        }
-        if (!isset($fields['__ts'])) {
-            $fields['__ts'] = 'Submission Timestamp';
-        }
-
         $this->fields = $fields;
         $this->nextUrl = $nexturl;
     }
@@ -146,19 +139,14 @@ class Form
         $post = $this->request->post();
 
         // populate default field names
-        if (!is_array($this->fields)) {
-            foreach (array_keys($post) as $k) {
-                $this->fields[$k] = $k;
-            }
-        }
-
         $fields = $this->fields;
         if (is_null($fields)) {
             $fields = ['__id' => 'Submission ID', '__ts' => 'Submission Timestamp'];
-            foreach (array_keys($post) as $k) {
-                $fields[$k] = $k;
-            }
         }
+        foreach (array_keys($post) as $k) {
+            $fields[$k] = $k;
+        }
+        $this->fields = $fields;
 
         // pull wanted data from post values
         $data = [];
