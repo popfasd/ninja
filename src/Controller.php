@@ -83,17 +83,18 @@ class Controller
     public function postSubmitAction(RequestInterface $request)
     {
         $referer = $request->getHeader('Referer');
+        $validationKey = $request->getAttribute('validationKey');
 
         // if validation has already failed once, the form's URL will
         // include the validation details and therefore produce a new
         // sha1 hash, so we need to strip the validation out if it
         // exists
-        if (strpos($referer, '__nv=') !== false) {
+        if (strpos($referer, $validationKey.'=') !== false) {
             $url = parse_url($referer);
             if (isset($url['query'])) {
                 $query = explode('&', $url['query']);
                 foreach ($query as $i => $kv) {
-                    if (strpos($kv, '__nv=') === 0) {
+                    if (strpos($kv, $validationKey.'=') === 0) {
                         unset($query[$i]);
                         break;
                     }
@@ -104,7 +105,7 @@ class Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $request->getAttribute('formDir'));
+        $form = new Form($request, $request->getAttribute('cacheDir'));
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -119,7 +120,7 @@ class Controller
             if (isset($url['query'])) {
                 $query = explode('&', $url['query']);
             };
-            $query[] = '__nv='.$details;
+            $query[] = $validationKey.'='.$details;
             $url['query'] = implode('&', $query);
 
             $urlstr = $this->assembleUrl($url);

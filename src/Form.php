@@ -42,6 +42,11 @@ class Form
     protected $validationErrors;
 
     /**
+     * @var string
+     */
+    protected $validationKey = '__nv';
+
+    /**
      * @param RequestInterface $request
      * @param $string $cacheDir
      */
@@ -140,6 +145,18 @@ class Form
     public function getNextUrl()
     {
         return $this->nextUrl;
+    }
+
+    /**
+     * @param string $key
+     */
+    public function setValidationKey($key)
+    {
+        if (empty($key)) {
+            throw new \InvalidArgumentException('$key expects non-empty string');
+        }
+        $this->valdationKey = $key;
+        return $this;
     }
 
     /**
