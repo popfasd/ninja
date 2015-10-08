@@ -3,5 +3,6 @@
 $parameters = [
     'mailto' => [],
     'uriPrefix' => '',
-    'formDir' => 'private/cache'
+    'cacheDir' => 'private/cache',
+    'validationKey' => '__nv'
 ];

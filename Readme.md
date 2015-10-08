@@ -10,7 +10,7 @@ Edit `private/parameters.php`
     $parameters = [
         'mailto' => ['your@address.com'],
         'uriPrefix' => '/path/to/ninja',
-        'formDir' => 'private/cache'
+        'cacheDir' => 'private/cache'
     ];
 
 Now update your `form` tag's `action` and `method` attributes. Ninja only likes POST requests.
@@ -65,6 +65,30 @@ The receipt template replaces `%key%` with the field values where `key` is the n
     Support
 
 Once the `email` field is included with the submission and the `receipt.tpl` is created for the form, Ninja will automatically start sending submission receipts.
+
+Validation
+----------
+
+Just a ninja must take care to strike at the right target, you too can ensure that your forms collect the right data. Validation rules can be added to `settings.php` to faciliate this. Rules consist of regular expressions which are applied to the corresponding field.
+
+    $validationRules = [
+        'firstName' => true, // just check the field isn't empty
+        'postal' => '/[A-Z][0-9][A-Z]\s[0-9][A-Z][0-9]/' // check for valid Canadian postal code (i.e. A1A 1A1)
+    ];
+
+If a submission fails validation, the user is redirect back to the form, with the validation results passed in the query string in the `__nv` key. This data is stored as a base64-encoded JSON string. The JSON object contains a key for each field that failed validation with a reason for the failure. Reasons are one of:
+
+    - `not received` - the field wasn't included with the request
+    - `empty` - the field was empty
+    - `failed` - the field failed to match the validation rule
+
+An example of a form URL that contains validation results:
+
+    http://example.com/myform.html?__nv=eyJmaWVsZEIiOiJmYWlsZWQifQ%3D%3D
+
+If you're worried now that when the form is re-submitted your form's ID will change (because the referer will include the validation results), don't worry. Ninja is wise, and will strip the validation results from the URL before processing.
+
+If `__nv` conflicts with other keys in your query string, you can change this to something else by changing `validationKey` in `private/parameters.php`.
 
 Contribute
 ----------
