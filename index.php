@@ -56,7 +56,7 @@ Popfasd\Ninja\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
 
 $server = $_SERVER;
 $server['REQUEST_URI'] = $_GET['q'];
-$request = new MattFerris\HttpRouting\Request($server);
+$request = new Popfasd\Ninja\Request($server);
 
 foreach ($parameters as $key => $val) {
     $request->setAttribute($key, $val);
