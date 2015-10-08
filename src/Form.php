@@ -32,6 +32,16 @@ class Form
     protected $nextUrl;
 
     /**
+     * @var array
+     */
+    protected $validationRules;
+
+    /**
+     * @var array
+     */
+    protected $validationErrors;
+
+    /**
      * @param RequestInterface $request
      * @param $string $cacheDir
      */
@@ -41,7 +51,7 @@ class Form
         $this->request = $request;
         $this->cacheDir = $cacheDir.'/'.$this->id;
 
-        $fields = $nexturl = null;
+        $fields = $nexturl = $validationRules = null;
         if (file_exists($this->cacheDir)) {
             $settingsCache = $this->cacheDir.'/settings.php';
             if (file_exists($settingsCache)) {
@@ -55,6 +65,7 @@ class Form
 
         $this->fields = $fields;
         $this->nextUrl = $nexturl;
+        $this->validationRules = $validationRules;
     }
 
     /**
@@ -129,6 +140,37 @@ class Form
     public function getNextUrl()
     {
         return $this->nextUrl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function validate()
+    {
+        $post = $this->request->post();
+
+        if (is_array($this->validationRules) && count($this->validationRules) > 0) {
+            // check fields
+            foreach ($this->validationRules as $field => $rule) {
+                if (!isset($post[$field])) {
+                    $this->validationErrors[$field] = 'not received';
+                } elseif (empty($post[$field])) {
+                    $this->validationErrors[$field] = 'empty';
+                } elseif (!is_bool($rule) && !preg_match($rule, $post[$field])) {
+                    $this->validationErrors[$field] = 'failed';
+                }
+            }
+        }
+
+        return (!is_array($this->validationErrors) || count($this->validationErrors) === 0);
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidationErrors()
+    {
+        return $this->validationErrors;
     }
 
     /**
