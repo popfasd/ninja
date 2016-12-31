@@ -14,7 +14,7 @@
 
 namespace Popfasd\Ninja;
 
-use MattFerris\HttpRouting\RequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 class Form
 {
@@ -64,7 +64,8 @@ class Form
      */
     public function __construct(RequestInterface $request, $cacheDir)
     {
-        $this->id = sha1($request->getHeader('Referer'));
+        $referer = $request->getHeaderLine('Referer');
+        $this->id = sha1($referer);
         $this->request = $request;
         $this->cacheDir = $cacheDir.'/'.$this->id;
 
@@ -76,7 +77,7 @@ class Form
             }
         } else {
             mkdir($this->cacheDir);
-            $settings = "<?php\n\n// url: ".$this->request->getHeader('Referer')."\n";
+            $settings = "<?php\n\n// url: ".$referer."\n";
             file_put_contents($this->cacheDir.'/settings.php', $settings);
         }
 
@@ -106,7 +107,7 @@ class Form
      */
     public function getUrl()
     {
-        return $this->request->getHeader('Referer');
+        return $this->request->getHeaderLine('Referer');
     }
 
     /**
@@ -176,7 +177,7 @@ class Form
      */
     public function validate()
     {
-        $post = $this->request->post();
+        $post = $this->request->getParsedBody();
 
         if (is_array($this->validationRules) && count($this->validationRules) > 0) {
             // check fields
@@ -207,7 +208,7 @@ class Form
      */
     public function process()
     {
-        $post = $this->request->post();
+        $post = $this->request->getParsedBody();
 
         // populate default field names
         $fields = $this->fields;

@@ -14,8 +14,6 @@
 
 namespace Popfasd\Ninja;
 
-use MattFerris\HttpRouting\RequestInterface;
-
 class FileListener
 {
     /**

@@ -19,7 +19,7 @@ $di = new MattFerris\Di\Di();
 $di->setParameters($parameters);
 
 $di->set('Dispatcher', function ($di) {
-    $dispatcher = new \MattFerris\HttpRouting\Dispatcher($di);
+    $dispatcher = new \MattFerris\Http\Routing\Dispatcher($di);
     $dispatcher->register(new \Popfasd\Ninja\RoutingBundle());
     return $dispatcher;
 }, true);
@@ -61,17 +61,19 @@ $ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
     $di->get('SubmissionReceiptListener'), 'onSubmissionProcessed'
 ));
 
-MattFerris\HttpRouting\DomainEvents::setDispatcher($ed);
-MattFerris\HttpRouting\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
+MattFerris\Http\Routing\DomainEvents::setDispatcher($ed);
+MattFerris\Http\Routing\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
 Popfasd\Ninja\DomainEvents::setDispatcher($ed);
 Popfasd\Ninja\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
 
 $server = $_SERVER;
-$server['REQUEST_URI'] = $_GET['q'];
-$request = new Popfasd\Ninja\Request($server);
+$server['REQUEST_URI'] = array_key_exists('q', $_GET) ? $_GET['q'] : $_SERVER['REQUEST_URI'];
+$request = Zend\Diactoros\ServerRequestFactory::fromGlobals($server);
 
-foreach ($parameters as $key => $val) {
-    $request->setAttribute($key, $val);
+$response = $di->get('Dispatcher')->dispatch($request);
+
+foreach (array_keys($response->getHeaders()) as $header) {
+    header($header.': '.$response->getHeaderLine($header));
 }
 
-echo $di->get('Dispatcher')->dispatch($request)->send();
+echo $response->getBody()->getContents();

@@ -14,16 +14,20 @@
 
 namespace Popfasd\Ninja;
 
-use MattFerris\HttpRouting\BundleInterface;
+use MattFerris\Http\Routing\BundleInterface;
+use MattFerris\Provider\ConsumerInterface;
+use Zend\Diactoros\Response;
 
 class RoutingBundle implements BundleInterface
 {
-    public function provides()
+    public function provides(ConsumerInterface $consumer)
     {
-        return [
-            ['method' => 'GET', 'uri' => '/submit', 'action' => '\\Popfasd\\Ninja\\Controller:getSubmitAction'],
-            ['method' => 'POST', 'uri' => '/submit', 'action' => '\\Popfasd\\Ninja\\Controller:postSubmitAction']
-        ];
+        $consumer
+            ->get('/submit', '\\Popfasd\\Ninja\\Controller:getSubmitAction')
+            ->post('/submit', '\\Popfasd\\Ninja\\Controller:postSubmitAction')
+            ->any('/', function () {
+                return new Response('php://memory', 404);
+            });
     }
 }
 

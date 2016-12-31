@@ -15,8 +15,8 @@
 namespace Popfasd\Ninja;
 
 use MattFerris\Di\ContainerInterface;
-use MattFerris\HttpRouting\RequestInterface;
-use MattFerris\HttpRouting\Response;
+use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response;
 
 class Controller
 {
@@ -80,22 +80,25 @@ class Controller
     }
 
     /**
-     * @param RequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      */
-    public function getSubmitAction(RequestInterface $request)
+    public function getSubmitAction(ServerRequestInterface $request)
     {
-        $response = new Response('This URI only accepts POST method', 405, 'text/plain');
-        $response->setHeader('Allow', 'POST');
+        $response = new Response('php://memory', 405, [
+            'Content-Type' => 'text/plain',
+            'Allow' => 'POST'
+        ]);
+        $response->getBody()->write('This URI only accets POST method');
         return $response;
     }
 
     /**
-     * @param RequestInterface $request
+     * @param \Psr\Htp\Message\ServerRequestInterface $request
      */
-    public function postSubmitAction(RequestInterface $request)
+    public function postSubmitAction(ServerRequestInterface $request)
     {
-        $referer = $request->getHeader('Referer');
-        $validationKey = $request->getAttribute('validationKey');
+        $referer = $request->getHeaderLine('Referer');
+        $validationKey = $this->di->getParameter('validationKey');
 
         // if validation has already failed once, the form's URL will
         // include the validation details and therefore produce a new
@@ -117,7 +120,7 @@ class Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $request->getAttribute('cacheDir'));
+        $form = new Form($request, $this->di->getParameter('cacheDir'));
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -138,8 +141,11 @@ class Controller
             $urlstr = $this->assembleUrl($url);
 
             // generate the response to redirect the user back to the form URL
-            $response = new Response('Form failed validation', 303, 'text/plain');
-            $response->setHeader('Location', $urlstr);
+            $response = new Response('php://memory', 303, [
+                'Content-Type' => 'text/plain',
+                'Location' => $urlstr]
+            );
+            $response->getBody()->write('Form failed validation');
 
             // by returning, we prevent anything else from running
             return $response;
@@ -149,12 +155,15 @@ class Controller
 
         $nexturl = $form->getNextUrl();
         if (!isset($nexturl) || empty($nexturl)) {
-            $prefix = str_replace('/index.php', '', $request->getAttribute('uriPrefix'));
+            $prefix = str_replace('/index.php', '', $this->di->getParameter('uriPrefix'));
             $nexturl = $prefix.'/public/thanks.html';
         }
 
-        $response = new Response('Form submitted', 303, 'text/plain');
-        $response->setHeader('Location', $nexturl);
+        $response = new Response('php://memory', 303, [
+            'Content-Type' => 'text/plain',
+            'Location' => $nexturl
+        ]);
+        $response->getBody()->write('Form submitted');
 
         return $response;
     }
