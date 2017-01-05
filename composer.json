@@ -10,9 +10,9 @@
         "mattferris/http-routing": "dev-develop",
         "mattferris/di": "dev-develop",
         "mattferris/events": "dev-develop",
-	"mattferris/application": "dev-develop",
-	"mattferris/bridge-components": "dev-develop",
-	"mattferris/component": "dev-develop",
+	    "mattferris/application": "dev-develop",
+	    "mattferris/bridge-components": "dev-develop",
+	    "mattferris/component": "^1.0",
         "zendframework/zend-diactoros": "^1.3"
     },
     "require-dev": {
