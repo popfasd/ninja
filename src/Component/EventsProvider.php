@@ -12,7 +12,7 @@
  * github.com/popfasd/ninja/blob/master/License.txt
  */
 
-namespace Popfasd\Ninja;
+namespace Popfasd\Ninja\Component;
 
 use MattFerris\Provider\ProviderInterface;
 use MattFerris\Di\ContainerInterface;

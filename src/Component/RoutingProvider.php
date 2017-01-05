@@ -19,7 +19,7 @@ use MattFerris\Di\ContainerInterface;
 use Popfasd\Ninja\Controller;
 use Zend\Diactoros\Response;
 
-class HttpRoutingProvider implements ProviderInterface
+class RoutingProvider implements ProviderInterface
 {
     /**
      * {@inheritDoc}

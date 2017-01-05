@@ -4,7 +4,7 @@
  * ninja - sneaky HTML form processor
  * github.com/popfasd/ninja
  *
- * Component/EventsLoggerProvider.php
+ * EventsLoggerProvider.php
  * @copyright Copyright (c) 2016 POPFASD
  * @author Matt Ferris <mferris@fasdoutreach.ca>
  *

@@ -15,65 +15,26 @@
 require('private/parameters.php');
 require('vendor/autoload.php');
 
-$di = new MattFerris\Di\Di();
+use MattFerris\Application\Application;
+use MattFerris\Application\Component;
+use MattFerris\Di\Di;
+use MattFerris\Bridge\Components\Di\DiComponent;
+use MattFerris\Bridge\Components\HttpRouting\HttpRoutingComponent;
+use MattFerris\Bridge\Components\Events\EventsComponent;
+use Popfasd\Ninja\Component\PopfasdNinjaComponent;
+
+$di = new Di();
 $di->setParameters($parameters);
 
-$di->set('Dispatcher', function ($di) {
-    $dispatcher = new \MattFerris\Http\Routing\Dispatcher($di);
-    $dispatcher->register(new \Popfasd\Ninja\RoutingBundle());
-    return $dispatcher;
-}, true);
+$app = new Application($di, [
+    EventsComponent::class,
+    Component::class,
+    HttpRoutingComponent::class,
+    PopfasdNinjaComponent::class
+]);
 
-$di->set('EventDispatcher', function ($di) {
-    $dispatcher = new \MattFerris\Events\Dispatcher();
-    return $dispatcher;
-}, true);
-
-$di->set('EventLogger', function ($di) {
-    $logger = new \MattFerris\Events\Logger($di->get('EventDispatcher'));
-    return $logger;
-}, true);
-
-$di->set('AdminNotifyListener', function ($di) {
-    $listener = new Popfasd\Ninja\AdminNotifyListener(
-        $di->getParameter('mailto')
-    );
-    return $listener;
-}, true);
-
-$di->set('FileListener', function ($di) {
-    return new Popfasd\Ninja\FileListener();
-}, true);
-
-$di->set('SubmissionReceiptListener', function ($di) {
-    return new Popfasd\Ninja\SubmissionReceiptListener();
-}, true);
-
-$ed = $di->get('EventDispatcher');
-
-$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
-    $di->get('AdminNotifyListener'), 'onSubmissionProcessed'
-));
-$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
-    $di->get('FileListener'), 'onSubmissionProcessed'
-));
-$ed->addListener('Popfasd.Ninja.SubmissionProcessedEvent', array(
-    $di->get('SubmissionReceiptListener'), 'onSubmissionProcessed'
-));
-
-MattFerris\Http\Routing\DomainEvents::setDispatcher($ed);
-MattFerris\Http\Routing\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
-Popfasd\Ninja\DomainEvents::setDispatcher($ed);
-Popfasd\Ninja\DomainEventLoggerHelpers::addHelpers($di->get('EventLogger'));
-
-$server = $_SERVER;
-$server['REQUEST_URI'] = array_key_exists('q', $_GET) ? $_GET['q'] : $_SERVER['REQUEST_URI'];
-$request = Zend\Diactoros\ServerRequestFactory::fromGlobals($server);
-
-$response = $di->get('Dispatcher')->dispatch($request);
-
-foreach (array_keys($response->getHeaders()) as $header) {
-    header($header.': '.$response->getHeaderLine($header));
+if (isset($_GET['q'])) {
+    $_SERVER['REQUEST_URI'] = $_GET['q'];
 }
 
-echo $response->getBody()->getContents();
+$app->run([HttpRoutingComponent::class, 'run']);    
