@@ -11,7 +11,8 @@
         "mattferris/events": "~0.4",
 	    "mattferris/application": "~0.1",
 	    "mattferris/bridge-components": "~0.1",
-        "zendframework/zend-diactoros": "^1.3"
+        "zendframework/zend-diactoros": "^1.3",
+        "symfony/yaml": "^3.2"
     },
     "require-dev": {
         "mikey179/vfsStream": "~1.0",

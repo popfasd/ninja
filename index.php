@@ -12,7 +12,6 @@
  * github.com/popfasd/ninja/blob/master/License.txt
  */
 
-require('private/parameters.php');
 require('vendor/autoload.php');
 
 use MattFerris\Application\Application;
@@ -22,6 +21,20 @@ use MattFerris\Bridge\Components\Di\DiComponent;
 use MattFerris\Bridge\Components\HttpRouting\HttpRoutingComponent;
 use MattFerris\Bridge\Components\Events\EventsComponent;
 use Popfasd\Ninja\Component\PopfasdNinjaComponent;
+use Symfony\Component\Yaml\Yaml;
+
+// load parameters
+if (file_exists('private/parameters.php')) {
+    // load parameters from php file
+    require('private/parameters.php');
+} elseif (file_exists('private/parameters.yaml')) {
+    // load parameters from yaml file
+    $parameters = Yaml::parse(file_get_contents('private/parameters.yaml'));
+} else {
+    error_log('ninja failed to start: no configuration specified');
+    http_response_code(500);
+    exit;
+}
 
 $di = new Di();
 $di->setParameters($parameters);
