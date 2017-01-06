@@ -88,7 +88,7 @@ class Controller
             'Content-Type' => 'text/plain',
             'Allow' => 'POST'
         ]);
-        $response->getBody()->write('This URI only accets POST method');
+        $response->getBody()->write('This URI only accepts POST method');
         return $response;
     }
 
