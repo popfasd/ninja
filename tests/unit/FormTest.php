@@ -1,6 +1,7 @@
 <?php
 
 use Popfasd\Ninja\Form;
+use Popfasd\Ninja\Submission;
 use Popfasd\Ninja\SubmissionProcessedEvent;
 use Popfasd\Ninja\DomainEvents;
 use Psr\Http\Message\ServerRequestInterface;
@@ -190,6 +191,6 @@ class FormTest extends PHPUnit_Framework_TestCase
         $request = $this->makeRequestWithBody([]);
 
         $form = new Form($request, vfsStream::url('testProcess'));
-        $form->process();
+        $this->assertInstanceOf(Submission::class, $form->process());
     }
 }

@@ -204,7 +204,7 @@ class Form
     }
 
     /**
-     * @return string The URL to forward to
+     * @return Submission The processed submission
      */
     public function process()
     {
@@ -237,6 +237,8 @@ class Form
 
         // raise submission processed event
         DomainEvents::dispatch(new SubmissionProcessedEvent($submission));
+
+        return $submission;
     }
 }
 
