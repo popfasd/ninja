@@ -43,10 +43,11 @@ class EventsProvider implements ProviderInterface
     {
         DomainEvents::setDispatcher($consumer);
 
-        $mailto = $this->container->getParameter('mailto');
+        $config = $this->container->get('Config');
+
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new AdminNotifyListener($mailto), 'onSubmissionProcessed']
+            [new AdminNotifyListener($config), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(

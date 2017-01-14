@@ -17,22 +17,10 @@ namespace Popfasd\Ninja;
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
+use Kispiox\Controller as KispioxController;
 
-class Controller
+class Controller extends KispioxController
 {
-    /**
-     * @var ContainerInterface $di
-     */
-    protected $di;
-
-    /**
-     * @param ContainerInterface $di
-     */
-    public function __construct(ContainerInterface $di)
-    {
-        $this->di = $di;
-    }
-
     /**
      * @param array $url
      */
@@ -97,8 +85,10 @@ class Controller
      */
     public function postSubmitAction(ServerRequestInterface $request)
     {
+        $config = $this->container->get('Config');
+
         $referer = $request->getHeaderLine('Referer');
-        $validationKey = $this->di->getParameter('validationKey');
+        $validationKey = $config->get('app.validationKey');
 
         // if validation has already failed once, the form's URL will
         // include the validation details and therefore produce a new
@@ -120,7 +110,7 @@ class Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $this->di->getParameter('cacheDir'));
+        $form = new Form($request, $config->get('app.cacheDir'));
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -155,8 +145,10 @@ class Controller
 
         $nexturl = $form->getNextUrl();
         if (!isset($nexturl) || empty($nexturl)) {
-            $prefix = str_replace('/index.php', '', $this->di->getParameter('uriPrefix'));
-            $nexturl = $prefix.'/public/thanks.html';
+            $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
+            $path = $prefix.'public/thanks.html';
+            $uri = $request->getUri()->withPath($path);
+            $nexturl = (string)$uri;
         }
 
         $response = new Response('php://memory', 303, [
@@ -166,6 +158,14 @@ class Controller
         $response->getBody()->write('Form submitted');
 
         return $response;
+    }
+
+    /**
+     * @param \Psr\Htp\Message\ServerRequestInterface $request
+     */
+    public function error404Action(ServerRequestInterface $request)
+    {
+        return $this->textResponse('page not found', 404);
     }
 }
 

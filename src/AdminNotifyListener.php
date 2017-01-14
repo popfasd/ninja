@@ -14,21 +14,22 @@
 
 namespace Popfasd\Ninja;
 
+use MattFerris\Configuration\ConfigurationInterface;
 use MattFerris\HttpRouting\RequestInterface;
 
 class AdminNotifyListener
 {
     /**
-     * @var array
+     * @var ConfigurationInterface
      */
-    protected $emails;
+    protected $config;
 
     /**
-     * @param array $emails
+     * @param ConfigurationInterface $config
      */
-    public function __construct(array $emails)
+    public function __construct(ConfigurationInterface $config)
     {
-        $this->emails = $emails;
+        $this->config = $config;
     }
 
     /**
@@ -46,7 +47,8 @@ class AdminNotifyListener
         }
 
         // send emails to listed recipients
-        foreach ($this->emails as $addr) {
+        $emails = $this->config->get('app.mailto');
+        foreach ($emails as $addr) {
             mail($addr, 'ninja: '.$form->getUrl(), $body);
         }
     }

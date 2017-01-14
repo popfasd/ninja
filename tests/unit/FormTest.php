@@ -12,7 +12,7 @@ class FormTest extends PHPUnit_Framework_TestCase
 {
     protected function makeRequest($referer = 'foo', $count = 1)
     {
-        $request = $this->getMock(ServerRequestInterface::class);
+        $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->exactly($count))
             ->method('getHeaderLine')
             ->with('Referer')
@@ -181,7 +181,7 @@ class FormTest extends PHPUnit_Framework_TestCase
     {
         vfsStream::setup('testProcess');
 
-        $dispatcher = $this->getMock(DispatcherInterface::class);
+        $dispatcher = $this->createMock(DispatcherInterface::class);
         $dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->isInstanceOf(SubmissionProcessedEvent::class));
