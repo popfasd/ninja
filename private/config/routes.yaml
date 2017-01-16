@@ -1,0 +1,20 @@
+#
+# private/config/routes.dist.yaml
+#
+# Route definitions
+#
+routes:
+
+    get_submit:
+        path:   '/submit'
+        method: 'GET'
+        action: 'Popfasd\Ninja\Controller:getSubmitAction'
+
+    post_submit:
+        path:   '/submit'
+        method: 'POST'
+        action: 'Popfasd\Ninja\Controller:postSubmitAction'
+
+    error_404:
+        path:   '/'
+        action: 'Popfasd\Ninja\Controller:error404Action'
