@@ -17,22 +17,10 @@ namespace Popfasd\Ninja;
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
+use Kispiox\Controller as KispioxController;
 
-class Controller
+class Controller extends KispioxController
 {
-    /**
-     * @var ContainerInterface $di
-     */
-    protected $di;
-
-    /**
-     * @param ContainerInterface $di
-     */
-    public function __construct(ContainerInterface $di)
-    {
-        $this->di = $di;
-    }
-
     /**
      * @param array $url
      */
@@ -84,11 +72,7 @@ class Controller
      */
     public function getSubmitAction(ServerRequestInterface $request)
     {
-        $response = new Response('php://memory', 405, [
-            'Content-Type' => 'text/plain',
-            'Allow' => 'POST'
-        ]);
-        $response->getBody()->write('This URI only accepts POST method');
+        $response = $this->textResponse('This URI only accepts POST method');
         return $response;
     }
 
@@ -97,8 +81,10 @@ class Controller
      */
     public function postSubmitAction(ServerRequestInterface $request)
     {
+        $config = $this->container->get('Config');
+
         $referer = $request->getHeaderLine('Referer');
-        $validationKey = $this->di->getParameter('validationKey');
+        $validationKey = $config->get('app.validationKey');
 
         // if validation has already failed once, the form's URL will
         // include the validation details and therefore produce a new
@@ -120,7 +106,25 @@ class Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $this->di->getParameter('cacheDir'));
+        $referer = $request->getHeaderLine('Referer');
+        $formId = sha1($referer);
+
+        $form = new Form($formId, $referer, $request->getParsedBody());
+        $cache = $this->container->get('FormCache');
+
+        $settings = null;
+        if (!$cache->hasForm($formId)) {
+            $cache->addForm($form);
+        }
+        $settings = $cache->getForm($formId);
+
+        if ($settings->has('fields')) {
+            $form->setFields($settings->get('fields'));
+        }
+
+        if ($settings->has('validationRules')) {
+            $form->setValidationRules($settings->get('validationRules'));
+        }
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -129,7 +133,7 @@ class Controller
             // build the base64 encoded json string
             $details = urlencode(base64_encode(json_encode($form->getValidationErrors())));
 
-            $url = parse_url($form->getUrl());
+            $url = parse_url($referer);
 
             $query = [];
             if (isset($url['query'])) {
@@ -140,12 +144,7 @@ class Controller
 
             $urlstr = $this->assembleUrl($url);
 
-            // generate the response to redirect the user back to the form URL
-            $response = new Response('php://memory', 303, [
-                'Content-Type' => 'text/plain',
-                'Location' => $urlstr]
-            );
-            $response->getBody()->write('Form failed validation');
+            $response = $this->redirectResponse($urlstr, 303);
 
             // by returning, we prevent anything else from running
             return $response;
@@ -153,19 +152,30 @@ class Controller
 
         $form->process();
 
-        $nexturl = $form->getNextUrl();
-        if (!isset($nexturl) || empty($nexturl)) {
-            $prefix = str_replace('/index.php', '', $this->di->getParameter('uriPrefix'));
-            $nexturl = $prefix.'/public/thanks.html';
+        $nexturl = null;
+        if ($settings->has('nextUrl')) {
+            $nexturl = $settings->get('nextUrl');
         }
 
-        $response = new Response('php://memory', 303, [
-            'Content-Type' => 'text/plain',
-            'Location' => $nexturl
-        ]);
-        $response->getBody()->write('Form submitted');
+        // if no nextUrl defined, use default
+        if (!isset($nexturl) || empty($nexturl)) {
+            $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
+            $path = $prefix.'public/thanks.html';
+            $uri = $request->getUri()->withPath($path);
+            $nexturl = (string)$uri;
+        }
+
+        $response = $this->redirectResponse($nexturl, 303);
 
         return $response;
+    }
+
+    /**
+     * @param \Psr\Htp\Message\ServerRequestInterface $request
+     */
+    public function error404Action(ServerRequestInterface $request)
+    {
+        return $this->textResponse('page not found', 404);
     }
 }
 

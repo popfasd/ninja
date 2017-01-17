@@ -20,6 +20,7 @@ use Popfasd\Ninja\DomainEvents;
 use Popfasd\Ninja\AdminNotifyListener;
 use Popfasd\Ninja\FileListener;
 use Popfasd\Ninja\SubmissionReceiptListener;
+use Popfasd\Ninja\Cache\CacheListener;
 
 class EventsProvider implements ProviderInterface
 {
@@ -43,20 +44,21 @@ class EventsProvider implements ProviderInterface
     {
         DomainEvents::setDispatcher($consumer);
 
-        $mailto = $this->container->getParameter('mailto');
+        $config = $this->container->get('Config');
+
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new AdminNotifyListener($mailto), 'onSubmissionProcessed']
+            [new AdminNotifyListener($config->get('app.mailto')), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new FileListener(), 'onSubmissionProcessed']
+            [new CacheListener($this->container->get('FormCache')), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new SubmissionReceiptListener(), 'onSubmissionProcessed']
+            [new SubmissionReceiptListener($config->get('app.cacheDir')), 'onSubmissionProcessed']
         );
     }
 }
