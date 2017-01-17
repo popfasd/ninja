@@ -20,16 +20,16 @@ use MattFerris\HttpRouting\RequestInterface;
 class AdminNotifyListener
 {
     /**
-     * @var ConfigurationInterface
+     * @var array
      */
-    protected $config;
+    protected $mailto;
 
     /**
-     * @param ConfigurationInterface $config
+     * @param array $mailto
      */
-    public function __construct(ConfigurationInterface $config)
+    public function __construct(array $mailto)
     {
-        $this->config = $config;
+        $this->mailto = $mailto;
     }
 
     /**
@@ -47,8 +47,7 @@ class AdminNotifyListener
         }
 
         // send emails to listed recipients
-        $emails = $this->config->get('app.mailto');
-        foreach ($emails as $addr) {
+        foreach ($this->mailto as $addr) {
             mail($addr, 'ninja: '.$form->getUrl(), $body);
         }
     }

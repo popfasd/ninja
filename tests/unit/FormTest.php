@@ -4,183 +4,110 @@ use Popfasd\Ninja\Form;
 use Popfasd\Ninja\Submission;
 use Popfasd\Ninja\SubmissionProcessedEvent;
 use Popfasd\Ninja\DomainEvents;
-use Psr\Http\Message\ServerRequestInterface;
-use org\bovigo\vfs\vfsStream;
 use MattFerris\Events\DispatcherInterface;
 
 class FormTest extends PHPUnit_Framework_TestCase
 {
-    protected function makeRequest($referer = 'foo', $count = 1)
+
+    public function testConstruct()
     {
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->exactly($count))
-            ->method('getHeaderLine')
-            ->with('Referer')
-            ->willReturn($referer);
-        return $request;
-    }
+        $url = 'foo';
+        $id = sha1($url);
+        $data = ['foo' => 'bar'];
 
-    protected function makeRequestWithBody($body, $count = 1, $request = null)
-    {
-        if (is_null($request)) {
-            $request = $this->makeRequest();
-        }
-        $request->expects($this->exactly($count))
-            ->method('getParsedBody')
-            ->willReturn($body);
-        return $request;
-    }
+        $form = new Form($id, $url, $data);
 
-    public function testConstructWithNewForm()
-    {
-        $vfs = vfsStream::setup('testConstruct');
-
-        $request = $this->makeRequest('foo', 2);
-
-        $formId = sha1('foo');
-        $cacheDir = vfsStream::url('testConstruct');
-        $formDir = $cacheDir.'/'.$formId;
-
-        $form = new Form($request, $cacheDir);
-
-        $this->assertEquals($form->getId(), $formId);
-        $this->assertEquals($form->getRequest(), $request);
+        $this->assertEquals($form->getId(), $id);
         $this->assertEquals($form->getUrl(), 'foo');
         $this->assertNull($form->getFields());
-        $this->assertEquals($form->getCacheDir(), $formDir);
-        $this->assertNull($form->getNextUrl());
-        $this->assertTrue($vfs->hasChild($formId));
-        $this->assertTrue($vfs->getChild($formId)->hasChild('settings.php'));
+        $this->assertNull($form->getValidationErrors());
+
     }
 
     /**
-     * @depends testConstructWithNewForm
-     */
-    public function testConstructWithExistingForm()
-    {
-        $request = $this->makeRequest();
-
-        $formId = sha1('foo');
-        $cacheDir = vfsStream::url('testConstruct');
-        $formDir = $cacheDir.'/'.$formId;
-
-        file_put_contents($formDir.'/settings.php', "<?php
-\$nexturl = 'bar';
-\$fields = ['field1'=>'Field One'];
-");
-
-        $form = new Form($request, $cacheDir);
-
-        $this->assertEquals($form->getFields(), ['field1'=>'Field One']);
-        $this->assertEquals($form->getFieldTitle('field1'), 'Field One');
-        $this->assertTrue($form->hasField('field1'));
-        $this->assertEquals($form->getNextUrl(), 'bar');
-    }
-
-    /**
-     * @depends testConstructWithNewForm
+     * @depends testConstruct
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage $key expects non-empty string
      */
     public function testSetEmptyValidationKey()
     {
-        $vfs = vfsStream::setup('testSetValidationKey');
-        $request = $this->makeRequest();
-        $form = new Form($request, vfsStream::url('testSetValidationKey'));
+        $url = 'foo';
+        $id = sha1($url);
+        $form = new Form($id, $url);
         $form->setValidationKey('');
     }
 
     /**
-     * @depends testConstructWithNewForm
+     * @depends testConstruct
      */
-    public function testValidateWithNewForm()
+    public function testValidate()
     {
-        vfsStream::setup('testValidate');
+        $url = 'foo';
+        $id = sha1($url);
+        $data = ['field1' => 'test'];
 
-        $request = $this->makeRequest();
-        $request->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn(['field1'=>'test']);
-
-        $form = new Form($request, vfsStream::url('testValidate'));
+        $form = new Form($id, $url, $data);
 
         $this->assertTrue($form->validate());
         $this->assertNull($form->getValidationErrors());
     }
 
     /**
-     * @depends testValidateWithNewForm
-     */
-    public function testValidateWithExistingForm()
-    {
-        $request = $this->makeRequestWithBody([
-                'field1' => 'test',
-                'field2' => ''
-        ]);
-
-        file_put_contents(vfsStream::url('testValidate').'/'.sha1('foo').'/settings.php', "<?php
-");
-
-        $form = new Form($request, vfsStream::url('testValidate'));
-        $this->assertTrue($form->validate());
-        $this->assertNull($form->getValidationErrors());
-    }
-
-    /**
-     * @depends testValidateWithExistingForm
+     * @depends testValidate
      */
     public function testValidateWithNotReceivedField()
     {
-        $request = $this->makeRequestWithBody([]);
+        $url = 'foo';
+        $id = sha1($url);
+        $data = [];
+        $rules = ['field1' => true];
 
-        file_put_contents(vfsStream::url('testValidate').'/'.sha1('foo').'/settings.php', "<?php
-\$validationRules = ['field1'=>true];
-");
+        $form = new Form($id, $url, $data);
+        $form->setValidationRules($rules);
 
-        $form = new Form($request, vfsStream::url('testValidate'));
         $this->assertFalse($form->validate());
         $this->assertEquals($form->getValidationErrors(), ['field1'=>'not received']);
     }
 
     /**
-     * @depends testValidateWithExistingForm
+     * @depends testValidate
      */
     public function testValidateWithEmptyField()
     {
-        $request = $this->makeRequestWithBody(['field1'=>'']);
+        $url = 'foo';
+        $id = sha1($url);
+        $data = ['field1' => ''];
+        $rules = ['field1' => true];
 
-        file_put_contents(vfsStream::url('testValidate').'/'.sha1('foo').'/settings.php', "<?php
-\$validationRules = ['field1'=>true];
-");
+        $form = new Form($id, $url, $data);
+        $form->setValidationRules($rules);
 
-        $form = new Form($request, vfsStream::url('testValidate'));
         $this->assertFalse($form->validate());
         $this->assertEquals($form->getValidationErrors(), ['field1'=>'empty']);
     }
 
     /**
-     * @depends testValidateWithExistingForm
+     * @depends testValidate
      */
     public function testValidateWithInvalidField()
     {
-        $request = $this->makeRequestWithBody(['field1'=>'bar']);
+        $url = 'foo';
+        $id = sha1($url);
+        $data = ['field1' => 'bar'];
+        $rules = ['field1' => '/foo/'];
 
-        file_put_contents(vfsStream::url('testValidate').'/'.sha1('foo').'/settings.php', "<?php
-\$validationRules = ['field1'=>'/foo/'];
-");
+        $form = new Form($id, $url, $data);
+        $form->setValidationRules($rules);
 
-        $form = new Form($request, vfsStream::url('testValidate'));
         $this->assertFalse($form->validate());
         $this->assertEquals($form->getValidationErrors(), ['field1'=>'failed']);
     }
 
     /**
-     * @depends testConstructWithNewForm
+     * @depends testConstruct
      */
-    public function testProcessWithNewForm()
+    public function testProcess()
     {
-        vfsStream::setup('testProcess');
-
         $dispatcher = $this->createMock(DispatcherInterface::class);
         $dispatcher->expects($this->once())
             ->method('dispatch')
@@ -188,9 +115,11 @@ class FormTest extends PHPUnit_Framework_TestCase
 
         DomainEvents::setDispatcher($dispatcher);
 
-        $request = $this->makeRequestWithBody([]);
+        $url = 'foo';
+        $id = sha1($url);
+        $data = ['foo' => 'bar'];
 
-        $form = new Form($request, vfsStream::url('testProcess'));
+        $form = new Form($id, $url, $data);
         $this->assertInstanceOf(Submission::class, $form->process());
     }
 }

@@ -19,8 +19,11 @@ mailto: []
 # where ninja lives in relation to the document root (e.g. /ninja)
 uriPrefix: /
 
+# the query string key that contains validation results (defaults to '__nv')
+validationKey: __nv
+
 # the path to the cache directory (default is 'private/cache')
 cacheDir: private/cache
 
-# the query string key that contains validation results (defaults to '__nv')
-validationKey: __nv
+# what storage driver to store form settings with (defaults to FileCache)
+cacheProvider: Popfasd\Ninja\Cache\FileCache

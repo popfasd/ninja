@@ -110,7 +110,24 @@ class Controller extends KispioxController
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $config->get('app.cacheDir'));
+        $referer = $request->getHeaderLine('Referer');
+        $formId = sha1($referer);
+
+        $cache = $this->container->get('FormCache');
+        if (!$cache->hasForm($formId)) {
+            $cache->addForm($formId, []);
+        }
+        $settings = $cache->getForm($formId);
+
+        $form = new Form($formId, $referer, $request->getParsedBody());
+
+        if ($settings->has('fields')) {
+            $form->setFields($settings->get('fields'));
+        }
+
+        if ($settings->has('validationRules')) {
+            $form->setValidationRules($settings->get('validationRules'));
+        }
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -119,7 +136,7 @@ class Controller extends KispioxController
             // build the base64 encoded json string
             $details = urlencode(base64_encode(json_encode($form->getValidationErrors())));
 
-            $url = parse_url($form->getUrl());
+            $url = parse_url($referer);
 
             $query = [];
             if (isset($url['query'])) {
@@ -143,7 +160,11 @@ class Controller extends KispioxController
 
         $form->process();
 
-        $nexturl = $form->getNextUrl();
+        $nexturl = null;
+        if ($settings->has('nextUrl')) {
+            $nexturl = $settings->get('nextUrl');
+        }
+
         if (!isset($nexturl) || empty($nexturl)) {
             $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
             $path = $prefix.'public/thanks.html';

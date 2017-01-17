@@ -14,7 +14,7 @@
 
 namespace Popfasd\Ninja;
 
-use Psr\Http\Message\RequestInterface;
+use RuntimeException;
 
 class Form
 {
@@ -24,9 +24,9 @@ class Form
     protected $id;
 
     /**
-     * @var RequestInterface
+     * @var string
      */
-    protected $request;
+    protected $url;
 
     /**
      * @var array
@@ -34,14 +34,9 @@ class Form
     protected $fields;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $cacheDir;
-
-    /**
-     * @var string
-     */
-    protected $nextUrl;
+    protected $data = [];
 
     /**
      * @var array
@@ -59,31 +54,15 @@ class Form
     protected $validationKey = '__nv';
 
     /**
-     * @param RequestInterface $request
-     * @param $string $cacheDir
+     * @param string $id
+     * @param string $url
+     * @param array $data
      */
-    public function __construct(RequestInterface $request, $cacheDir)
+    public function __construct($id, $url, array $data = [])
     {
-        $referer = $request->getHeaderLine('Referer');
-        $this->id = sha1($referer);
-        $this->request = $request;
-        $this->cacheDir = $cacheDir.'/'.$this->id;
-
-        $fields = $nexturl = $validationRules = null;
-        if (file_exists($this->cacheDir)) {
-            $settingsCache = $this->cacheDir.'/settings.php';
-            if (file_exists($settingsCache)) {
-                require($settingsCache);
-            }
-        } else {
-            mkdir($this->cacheDir);
-            $settings = "<?php\n\n// url: ".$referer."\n";
-            file_put_contents($this->cacheDir.'/settings.php', $settings);
-        }
-
-        $this->fields = $fields;
-        $this->nextUrl = $nexturl;
-        $this->validationRules = $validationRules;
+        $this->id = $id;
+        $this->url = $url;
+        $this->data = $data;
     }
 
     /**
@@ -97,17 +76,9 @@ class Form
     /**
      * @return string
      */
-    public function getRequest()
-    {
-        return $this->request;
-    }
-
-    /**
-     * @return string
-     */
     public function getUrl()
     {
-        return $this->request->getHeaderLine('Referer');
+        return $this->url;
     }
 
     /**
@@ -116,6 +87,16 @@ class Form
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @param array $fields
+     * @return self
+     */
+    public function setFields(array $fields)
+    {
+        $this->fields = $fields;
+        return $this;
     }
 
     /**
@@ -145,19 +126,13 @@ class Form
     }
 
     /**
-     * @return string
+     * @param array $rules
+     * @return self
      */
-    public function getCacheDir()
+    public function setValidationRules(array $rules)
     {
-        return $this->cacheDir;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNextUrl()
-    {
-        return $this->nextUrl;
+        $this->validationRules = $rules;
+        return $this;
     }
 
     /**
@@ -177,16 +152,14 @@ class Form
      */
     public function validate()
     {
-        $post = $this->request->getParsedBody();
-
         if (is_array($this->validationRules) && count($this->validationRules) > 0) {
             // check fields
             foreach ($this->validationRules as $field => $rule) {
-                if (!isset($post[$field])) {
+                if (!isset($this->data[$field])) {
                     $this->validationErrors[$field] = 'not received';
-                } elseif (empty($post[$field])) {
+                } elseif (empty($this->data[$field])) {
                     $this->validationErrors[$field] = 'empty';
-                } elseif (!is_bool($rule) && !preg_match($rule, $post[$field])) {
+                } elseif (!is_bool($rule) && !preg_match($rule, $this->data[$field])) {
                     $this->validationErrors[$field] = 'failed';
                 }
             }
@@ -205,17 +178,16 @@ class Form
 
     /**
      * @return Submission The processed submission
+     * @throws RuntimeException Submitted data doesn't contain a defined field
      */
     public function process()
     {
-        $post = $this->request->getParsedBody();
-
         // populate default field names
         $fields = $this->fields;
         if (is_null($fields)) {
             $fields = ['__id' => 'Submission ID', '__ts' => 'Submission Timestamp'];
         }
-        foreach (array_keys($post) as $k) {
+        foreach (array_keys($this->data) as $k) {
             $fields[$k] = $k;
         }
         $this->fields = $fields;
@@ -227,7 +199,8 @@ class Form
             if (strpos($k, '__') === 0) {
                 continue;
             }
-            $data[$k] = $post[$k];
+
+            $data[$k] = $this->data[$k];
         }
 
         // generate submission ID and add field/data

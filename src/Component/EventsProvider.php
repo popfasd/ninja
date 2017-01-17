@@ -47,17 +47,17 @@ class EventsProvider implements ProviderInterface
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new AdminNotifyListener($config), 'onSubmissionProcessed']
+            [new AdminNotifyListener($config->get('app.mailto')), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new FileListener(), 'onSubmissionProcessed']
+            [new FileListener($config->get('app.cacheDir')), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new SubmissionReceiptListener(), 'onSubmissionProcessed']
+            [new SubmissionReceiptListener($config->get('app.cacheDir')), 'onSubmissionProcessed']
         );
     }
 }

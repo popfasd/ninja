@@ -17,6 +17,19 @@ namespace Popfasd\Ninja;
 class FileListener
 {
     /**
+     * @var string
+     */
+    protected $cacheDir;
+
+    /**
+     * @param string $cacheDir
+     */
+    public function __construct($cacheDir)
+    {
+        $this->cacheDir = $cacheDir;
+    }
+
+    /**
      * @param SubmissionProcessedEvent $event
      */
     public function onSubmissionProcessed(SubmissionProcessedEvent $event)
@@ -24,7 +37,7 @@ class FileListener
         $submission = $event->getSubmission();
         $form = $submission->getForm();
 
-        $saveFile = $form->getCacheDir().'/submissions.tsv';
+        $saveFile = $this->cacheDir.'/'.$form->getId().'/submissions.tsv';
 
         // get formatted row
         $fields = $form->getFields();
