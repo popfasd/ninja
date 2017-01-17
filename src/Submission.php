@@ -88,5 +88,13 @@ class Submission
         $data['__ts'] = $this->timestamp;
         return $data;
     }
+
+    /**
+     * @return array
+     */
+    public function __toArray()
+    {
+        return $this->getData();
+    }
 }
 

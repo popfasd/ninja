@@ -14,6 +14,8 @@
 
 namespace Popfasd\Ninja\Cache;
 
+use Popfasd\Ninja\Form;
+use Popfasd\Ninja\Submission;
 use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 use MattFerris\Configuration\Configuration;
@@ -52,15 +54,23 @@ class FileCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function addForm($formId, array $settings = [])
+    public function addForm(Form $form, array $settings = [])
     {
+        $formId = $form->getId();
         if ($this->hasForm($formId)) {
             throw new RuntimeException(
                 'form "'.$formId.'" already exists in the cache'
             );
         }
 
-        mkdir($this->cacheDir.'/'.$formId);
+        if (count($settings) === 0) {
+            $settings['url'] = $form->getUrl();
+        }
+
+        $formPath = $this->cacheDir.'/'.$formId;
+
+        mkdir($formPath);
+        mkdir($formPath.'/submissions');
         file_put_contents($this->cacheDir.'/'.$formId.'/settings.yaml', Yaml::dump($settings));
 
         return $this;
@@ -84,6 +94,30 @@ class FileCache implements CacheInterface
         $settings->load('settings.yaml');
 
         return $settings;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addSubmission(Submission $submission)
+    {
+        $formId = $submission->getForm()->getId();
+        $subId = $submission->getId();
+        if (!$this->hasForm($formId)) {
+            throw new RuntimeException(
+                'submission "'.$subId.'" belongs to form "'.$formId.'" which does not exist'
+            );
+        }
+
+        $subPath = $this->cacheDir.'/'.$formId.'/submissions/'.$subId;
+
+        if (file_exists($subPath)) {
+            throw new RuntimeException(
+                'submission "'.$subId.'" (form "'.$formId.'") already exists'
+            );
+        }
+
+        file_put_contents($subPath, serialize($submission->__toArray()));
     }
 }
 

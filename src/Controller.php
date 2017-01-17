@@ -109,13 +109,14 @@ class Controller extends KispioxController
         $referer = $request->getHeaderLine('Referer');
         $formId = sha1($referer);
 
+        $form = new Form($formId, $referer, $request->getParsedBody());
         $cache = $this->container->get('FormCache');
+
+        $settings = null;
         if (!$cache->hasForm($formId)) {
-            $cache->addForm($formId, []);
+            $cache->addForm($form);
         }
         $settings = $cache->getForm($formId);
-
-        $form = new Form($formId, $referer, $request->getParsedBody());
 
         if ($settings->has('fields')) {
             $form->setFields($settings->get('fields'));

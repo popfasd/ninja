@@ -14,6 +14,9 @@
 
 namespace Popfasd\Ninja\Cache;
 
+use Popfasd\Ninja\Form;
+use Popfasd\Ninja\Submission;
+
 interface CacheInterface
 {
     /**
@@ -27,12 +30,12 @@ interface CacheInterface
     /**
      * Add a form to the cache with optional settings.
      *
-     * @param string $formId
+     * @param Form $form
      * @param array $settings Optional
      * @return self
-     * @throws \RuntimeException If $formId already exists
+     * @throws \RuntimeException If form already exists
      */
-    public function addForm($formId, array $settings = []);
+    public function addForm(Form $form, array $settings = []);
 
     /**
      * Get a form from the cache.
@@ -42,5 +45,14 @@ interface CacheInterface
      * @throws \RuntimeException If $formId doesn't exist
      */
     public function getForm($formId);
+
+    /**
+     * Add a form submission to the cache.
+     *
+     * @param Submission $submission
+     * @return self
+     * @throws \RuntimeException If submission already exists, or form doesn't exist
+     */
+    public function addSubmission(Submission $submission);
 }
 

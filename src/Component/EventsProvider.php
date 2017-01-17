@@ -20,6 +20,7 @@ use Popfasd\Ninja\DomainEvents;
 use Popfasd\Ninja\AdminNotifyListener;
 use Popfasd\Ninja\FileListener;
 use Popfasd\Ninja\SubmissionReceiptListener;
+use Popfasd\Ninja\Cache\CacheListener;
 
 class EventsProvider implements ProviderInterface
 {
@@ -52,7 +53,7 @@ class EventsProvider implements ProviderInterface
 
         $consumer->addListener(
             'Popfasd.Ninja.SubmissionProcessedEvent',
-            [new FileListener($config->get('app.cacheDir')), 'onSubmissionProcessed']
+            [new CacheListener($this->container->get('FormCache')), 'onSubmissionProcessed']
         );
 
         $consumer->addListener(
