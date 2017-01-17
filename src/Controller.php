@@ -72,11 +72,7 @@ class Controller extends KispioxController
      */
     public function getSubmitAction(ServerRequestInterface $request)
     {
-        $response = new Response('php://memory', 405, [
-            'Content-Type' => 'text/plain',
-            'Allow' => 'POST'
-        ]);
-        $response->getBody()->write('This URI only accepts POST method');
+        $response = $this->textResponse('This URI only accepts POST method');
         return $response;
     }
 
@@ -147,12 +143,7 @@ class Controller extends KispioxController
 
             $urlstr = $this->assembleUrl($url);
 
-            // generate the response to redirect the user back to the form URL
-            $response = new Response('php://memory', 303, [
-                'Content-Type' => 'text/plain',
-                'Location' => $urlstr]
-            );
-            $response->getBody()->write('Form failed validation');
+            $response = $this->redirectResponse($urlstr, 303);
 
             // by returning, we prevent anything else from running
             return $response;
@@ -165,6 +156,7 @@ class Controller extends KispioxController
             $nexturl = $settings->get('nextUrl');
         }
 
+        // if no nextUrl defined, use default
         if (!isset($nexturl) || empty($nexturl)) {
             $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
             $path = $prefix.'public/thanks.html';
@@ -172,11 +164,7 @@ class Controller extends KispioxController
             $nexturl = (string)$uri;
         }
 
-        $response = new Response('php://memory', 303, [
-            'Content-Type' => 'text/plain',
-            'Location' => $nexturl
-        ]);
-        $response->getBody()->write('Form submitted');
+        $response = $this->redirectResponse($nexturl, 303);
 
         return $response;
     }
