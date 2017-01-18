@@ -15,6 +15,21 @@ routes:
         method: 'POST'
         action: 'Popfasd\Ninja\Controller:postSubmitAction'
 
+    submissions_get:
+        path:   '/api/forms/{formId}/submissions'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getSubmissionsAction'
+
+    form_get:
+        path:   '/api/forms/{formId}'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getFormAction'
+
+    forms_get:
+        path:   '/api/forms'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getFormsAction'
+
     error_404:
         path:   '/'
         action: 'Popfasd\Ninja\Controller:error404Action'

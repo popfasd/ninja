@@ -99,6 +99,28 @@ class FileCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    public function getForms()
+    {
+        $forms = [];
+
+        $dh = opendir($this->cacheDir);
+        while ($f = readdir($dh)) {
+            if (strpos($f, '.') === 0) {
+                continue;
+            }
+
+            $settings = $this->getForm($f);
+
+            $forms[] = new Form($f, $settings->get('url'));
+        }
+        closedir($fh);
+
+        return $forms;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function addSubmission(Submission $submission)
     {
         $formId = $submission->getForm()->getId();
@@ -118,6 +140,37 @@ class FileCache implements CacheInterface
         }
 
         file_put_contents($subPath, serialize($submission->__toArray()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSubmissionsByForm(Form $form)
+    {
+        $formId = $form->getId();
+
+        if (!$this->hasForm($formId)) {
+            throw new RuntimeException('form "'.$formId,'" does not exist');
+        }
+
+        $subsPath = $this->cacheDir.'/'.$formId.'/submissions';
+        if (!file_exists($subsPath)) {
+            throw new RuntimeException('path "'.$subPath.'" does not exist');
+        }
+
+        $submissions = [];
+        $dh = opendir($subsPath);
+        while ($f = readdir($dh)) {
+            if (strpos($f, '.') === 0) {
+                continue;
+            }
+
+            $data = unserialize(file_get_contents($subsPath.'/'.$f));
+            $submissions[] = new Submission($data['__id'], $form, $data, $data['__ts']);
+        }
+        closedir($dh);
+
+        return $submissions;
     }
 }
 
