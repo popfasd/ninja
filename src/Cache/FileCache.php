@@ -113,7 +113,7 @@ class FileCache implements CacheInterface
 
             $forms[] = new Form($f, $settings->get('url'));
         }
-        closedir($fh);
+        closedir($dh);
 
         return $forms;
     }
