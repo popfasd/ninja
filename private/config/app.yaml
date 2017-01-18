@@ -6,6 +6,7 @@
 components:
 
     # responsible for loading services and routes
+    - MattFerris\Bridge\Components\Auth\AuthComponent
     - Kispiox\Component\DefaultComponent
     - Popfasd\Ninja\Component\PopfasdNinjaComponent
 

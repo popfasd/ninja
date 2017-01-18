@@ -15,6 +15,10 @@ routes:
         method: 'POST'
         action: 'Popfasd\Ninja\Controller:postSubmitAction'
 
+    api_auth:
+        path:   '/api'
+        action: 'Kispiox\Authentication\AuthController:authAction'
+
     submissions_get:
         path:   '/api/forms/{formId}/submissions'
         method: 'GET'
