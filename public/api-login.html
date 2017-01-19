@@ -1,0 +1,24 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Ninja API Login</title>
+    <script src="ninja.js"></script>
+    <link rel="stylesheet" type="text/css" href="ninja.css">
+  </head>
+  <body>
+    <h1>Ninja API Login</h1>
+    <form id="testForm" action="../index.php?q=/api/auth" method="post">
+      <div>
+        <label for="user">Username</label>
+        <input type="text" id="user" name="user">
+      </div>
+      <div>
+        <label for="pass">Password</label>
+        <input type="text" id="password" name="pass">
+      </div>
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>

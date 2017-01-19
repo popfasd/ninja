@@ -28,3 +28,8 @@ cacheDir: private/cache
 
 # what storage driver to store form settings with (defaults to FileCache)
 cacheProvider: Popfasd\Ninja\Cache\FileCache
+
+# auth settings
+auth:
+    key: 'gpl/fzkYGmhHECxc/SyIHFD5m19wwYl0ykfwtqNYre4KFF2bPC8DN3pRuR9dLxZk'
+    duration: 300
