@@ -171,7 +171,51 @@ class Controller extends KispioxController
     }
 
     /**
-     * @param \Psr\Htp\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string $formId
+     */
+    public function getSubmissionsAction(ServerRequestInterface $request, $formId)
+    {
+        $cache = $this->container->get('FormCache');
+
+        if (!$cache->hasForm($formId)) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Form does not exist',
+                'debug' => 'form ID "'.$formId.'" does not exist in the cache'
+            ]);
+        }
+
+        try {
+            $settings = $cache->getForm($formId);
+            $form = new Form($formId, $settings->get('url'));            
+            $submissions = $cache->getSubmissionsByForm($form);
+        } catch (Exception $e) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Failed to retrieve form submissions',
+                'debug' => 'encountered exception "'.get_class($e).'" with '.$e->getMessage()
+            ]);
+        }
+
+        $config = $this->container->get('Config');
+        $uri = $request->getUri();
+        $formUri = $uri->withPath($config->get('app.uriPrefix').'/forms/'.$formId);
+        $formUri = $formUri->withQuery('');
+
+        foreach (array_keys($submissions) as $i) {
+            $submissions[$i] = $submissions[$i]->__toArray();
+        }
+
+        return $this->jsonResponse([
+            'status' => 'success',
+            'form' => $formUri->__toString(),
+            'submissions' => $submissions
+        ]);
+    }
+
+    /**
+     * @param \Psr\Htyp\Message\ServerRequestInterface $request
      */
     public function error404Action(ServerRequestInterface $request)
     {

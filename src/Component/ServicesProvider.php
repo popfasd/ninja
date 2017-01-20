@@ -24,9 +24,14 @@ class ServicesProvider implements ProviderInterface
     public function provides($consumer)
     {
         $config = $consumer->get('Config');
+
         $cacheDir = $config->get('app.cacheDir');
         $cacheProvider = $config->get('app.cacheProvider');
         $cache = $consumer->injectConstructor($cacheProvider, ['cacheDir' => $cacheDir]);
         $consumer->set('FormCache', $cache);
+
+        $exportProvider = $config->get('app.exportProvider');
+        $exporter = $consumer->injectConstructor($exportProvider);
+        $consumer->set('Exporter', $exporter);
     }
 }

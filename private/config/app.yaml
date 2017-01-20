@@ -6,6 +6,7 @@
 components:
 
     # responsible for loading services and routes
+    - MattFerris\Bridge\Components\Auth\AuthComponent
     - Kispiox\Component\DefaultComponent
     - Popfasd\Ninja\Component\PopfasdNinjaComponent
 
@@ -27,3 +28,11 @@ cacheDir: private/cache
 
 # what storage driver to store form settings with (defaults to FileCache)
 cacheProvider: Popfasd\Ninja\Cache\FileCache
+
+# set the export provider
+exportProvider: Popfasd\Ninja\Exporter\CsvExporter
+
+# auth settings
+auth:
+    key: 'gpl/fzkYGmhHECxc/SyIHFD5m19wwYl0ykfwtqNYre4KFF2bPC8DN3pRuR9dLxZk'
+    duration: 300

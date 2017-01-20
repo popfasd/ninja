@@ -47,6 +47,13 @@ interface CacheInterface
     public function getForm($formId);
 
     /**
+     * Get all forms.
+     *
+     * @return array
+     */
+    public function getForms();
+
+    /**
      * Add a form submission to the cache.
      *
      * @param Submission $submission
@@ -54,5 +61,14 @@ interface CacheInterface
      * @throws \RuntimeException If submission already exists, or form doesn't exist
      */
     public function addSubmission(Submission $submission);
+
+    /**
+     * Get all submissions for a form.
+     *
+     * @param Form $form
+     * @return array
+     * @throws \RuntimeException If form, or form submissions path doesn't exist
+     */
+    public function getSubmissionsByForm(Form $form);
 }
 
