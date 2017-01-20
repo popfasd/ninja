@@ -48,7 +48,7 @@ ninja.login = function (view, args) {
     };
 
     var apiuri = ninja.getApiBase() + '/auth';
-    ninja.endpoint(apiuri);
+    ninja.endpoint('POST ' + apiuri);
 
     var submitFn = function (e) {
         $.post(apiuri, view.find('form').serialize())
@@ -101,7 +101,7 @@ ninja.forms = function (view) {
     };
 
     var apiuri = ninja.getApiBase() + '/forms';
-    ninja.endpoint(apiuri);
+    ninja.endpoint('GET ' + apiuri);
 
     $.get(apiuri)
         .done(successFn)
@@ -155,7 +155,7 @@ ninja.submissions = function (view, args) {
 
 
     var apiuri = ninja.getApiBase() + '/forms/' + args.formId + '/submissions';
-    ninja.endpoint(apiuri);
+    ninja.endpoint('GET ' + apiuri);
 
     $.get(apiuri)
         .done(successFn)

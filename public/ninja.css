@@ -21,6 +21,12 @@ input {
     font-style: italic;
 }
 
+body > header > h1 {
+    border-bottom: solid #333 1px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
 section.page > header {
     position: relative;
 }
