@@ -161,6 +161,12 @@ ninja.submissions = function (view, args) {
         .done(successFn)
         .fail(failureFn);
 
+    view.find('a[href="export"]')
+        .attr('href', ninja.getApiBase() + '/forms/' + args.formId + '/export')
+        .attr('target', '_blank')
+        .click(function (e) {
+            e.stopPropagation();
+        });
 };
 
 /*

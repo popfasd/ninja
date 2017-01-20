@@ -125,5 +125,40 @@ class ApiController extends Controller
             'submissions' => $jsonSubs
         ]);
     }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string $formId
+     */
+    public function getExportAction($request, $formId)
+    {
+        $cache = $this->container->get('FormCache');
+        $exporter = $this->container->get('Exporter');
+
+        if (!$cache->hasForm($formId)) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Form does not exist',
+                'debug' => 'form ID "'.$formId.'" does not exist in the cache'
+            ]);
+        }
+
+        $submissions = [];
+        try {
+            $settings = $cache->getForm($formId);
+            $form = new Form($formId, $settings->get('url'));
+            $submissions = $cache->getSubmissionsByForm($form);
+        } catch (Exception $e) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Failed to retrieve form submissions',
+                'debug' => 'encountered exception "'.get_class($e).'" with '.$e->getMessage()
+            ]);
+        }
+
+        $response = (new Response())->withHeader('content-type', $exporter->getMimeType());
+        $response->getBody()->write($exporter->export($submissions));
+        return $response;
+    }
 }
 

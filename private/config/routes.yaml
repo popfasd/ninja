@@ -29,6 +29,11 @@ routes:
         method: 'GET'
         action: 'Popfasd\Ninja\ApiController:getSubmissionsAction'
 
+    api_export_form:
+        path:   '/api/forms/{formId}/export'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getExportAction'
+
     api_get_form:
         path:   '/api/forms/{formId}'
         method: 'GET'
