@@ -1,5 +1,5 @@
 composer.phar
 composer.lock
-private/cache/*.php
-private/cache/*.tsv
+private/cache/*/*
+private/config/users.yaml
 vendor/

@@ -35,4 +35,4 @@ exportProvider: Popfasd\Ninja\Exporter\CsvExporter
 # auth settings
 auth:
     key: 'gpl/fzkYGmhHECxc/SyIHFD5m19wwYl0ykfwtqNYre4KFF2bPC8DN3pRuR9dLxZk'
-    duration: 300
+    duration: 3600

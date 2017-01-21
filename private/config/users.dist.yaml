@@ -1,0 +1,12 @@
+#
+# private/config/users.dist.yaml
+#
+# Defines users for access to the API
+#
+# User passwords can be generated via bin/passwd
+#
+
+users:
+
+    # user: '<hashed password>'
+
