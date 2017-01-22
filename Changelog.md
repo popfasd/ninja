@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3
+---
+
+* New API for accessing form and submission data with example API client
+* Refactored and added cache and exporter support
+* Migrated to kispiox web framework
+
 0.2
 ---
 
