@@ -1,0 +1,49 @@
+#
+# private/config/routes.dist.yaml
+#
+# Route definitions
+#
+routes:
+
+    get_submit:
+        path:   '/submit'
+        method: 'GET'
+        action: 'Popfasd\Ninja\Controller:getSubmitAction'
+
+    post_submit:
+        path:   '/submit'
+        method: 'POST'
+        action: 'Popfasd\Ninja\Controller:postSubmitAction'
+
+    api_auth:
+        path:   '/api/auth'
+        method: 'POST'
+        action: 'Kispiox\Authentication\AuthController:authenticateAction'
+
+    api_verify_auth:
+        path:   '/api'
+        action: 'Kispiox\Authentication\AuthController:verifyAction'
+
+    api_list_submissions:
+        path:   '/api/forms/{formId}/submissions'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getSubmissionsAction'
+
+    api_export_form:
+        path:   '/api/forms/{formId}/export'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getExportAction'
+
+    api_get_form:
+        path:   '/api/forms/{formId}'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getFormAction'
+
+    api_list_forms:
+        path:   '/api/forms'
+        method: 'GET'
+        action: 'Popfasd\Ninja\ApiController:getFormsAction'
+
+    error_404:
+        path:   '/'
+        action: 'Popfasd\Ninja\Controller:error404Action'

@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Ninja API Login</title>
+    <link rel="stylesheet" type="text/css" href="ninja.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="api-browser.js"></script>
+  </head>
+  <body>
+    <header><h1>Ninja API Browser</h1></header>
+
+    <div class="flash"><p></p></div>
+
+    <!-- login form -->
+    <section class="page" id="login">
+      <header><h1>Login</h1></header>
+      <section class="content">
+        <form id="testForm" method="post">
+          <div>
+            <label for="user">Username</label>
+            <input type="text" id="user" name="user">
+          </div>
+          <div>
+            <label for="pass">Password</label>
+            <input type="text" id="password" name="pass">
+          </div>
+          <input type="submit" value="Submit">
+        </form>
+      </section>
+    </section>
+    <!-- / login form -->
+
+    <!-- forms listing -->
+    <section class="page" id="forms">
+      <header>
+        <h1>Forms</h1>
+      </header>
+      <section class="content">
+        <ul id="forms-list"></ul>
+      </section>
+    </section>
+    <!-- / forms listing -->
+
+    <!-- submissions listing -->
+    <section class="page" id="submissions">
+      <header>
+        <nav class="page-header-left"><a href="forms">Forms</a></nav>
+        <h1>Form Submissions</h1>
+        <nav class="page-header-right"><a href="export">Export</a></nav>
+      </header>
+      <section class="content">
+        <table id="submissions-list">
+          <thead>
+            <tr></tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </section>
+    </section>
+    <!-- / submissions listing -->
+
+    <footer><p><span id="api-endpoint"></span></footer>
+
+  </body>
+</html>

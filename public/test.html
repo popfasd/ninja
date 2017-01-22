@@ -4,13 +4,23 @@
   <head>
     <meta charset="utf-8">
     <title>Ninja Test Form</title>
+    <script src="ninja.js"></script>
+    <link rel="stylesheet" type="text/css" href="ninja.css">
   </head>
   <body>
     <h1>Ninja Test Form</h1>
-    <form action="../index.php?q=/submit" method="post">
-      <div><label for="fieldA">Field A</label><input type="text" name="fieldA"></div>
-      <div><label for="fieldB">Field B</label><input type="text" name="fieldB"></div>
-      <input type="submit" value="Submit">
+    <form id="testForm" action="../index.php?q=/submit" method="post">
+      <div>
+        <label for="fieldA">Name</label>
+        <input type="text" id="fieldA" name="fieldA">
+      </div>
+      <div>
+        <label for="fieldB">Secret</label>
+        <input type="text" id="fieldB" name="fieldB">
+        <span class="field-hint">(secret is "test")</span>
+      </div>
+      <input type="submit" value="Submit" onclick="ninja.doFormSubmit('testForm')">
     </form>
+    <script>ninja.loadValidationResults();</script>
   </body>
 </html>

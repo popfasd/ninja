@@ -1,7 +1,20 @@
 <?php
 
+/**
+ * ninja - sneaky HTML form processor
+ * github.com/popfasd/ninja
+ *
+ * AdminNotifyListener.php
+ * @copyright Copyright (c) 2016 POPFASD
+ * @author Matt Ferris <mferris@fasdoutreach.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * github.com/popfasd/ninja/blob/master/License.txt
+ */
+
 namespace Popfasd\Ninja;
 
+use MattFerris\Configuration\ConfigurationInterface;
 use MattFerris\HttpRouting\RequestInterface;
 
 class AdminNotifyListener
@@ -9,14 +22,14 @@ class AdminNotifyListener
     /**
      * @var array
      */
-    protected $emails;
+    protected $mailto;
 
     /**
-     * @param array $emails
+     * @param array $mailto
      */
-    public function __construct(array $emails)
+    public function __construct(array $mailto)
     {
-        $this->emails = $emails;
+        $this->mailto = $mailto;
     }
 
     /**
@@ -34,7 +47,7 @@ class AdminNotifyListener
         }
 
         // send emails to listed recipients
-        foreach ($this->emails as $addr) {
+        foreach ($this->mailto as $addr) {
             mail($addr, 'ninja: '.$form->getUrl(), $body);
         }
     }

@@ -1,26 +1,26 @@
 <?php
 
+/**
+ * ninja - sneaky HTML form processor
+ * github.com/popfasd/ninja
+ *
+ * Controller.php
+ * @copyright Copyright (c) 2016 POPFASD
+ * @author Matt Ferris <mferris@fasdoutreach.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * github.com/popfasd/ninja/blob/master/License.txt
+ */
+
 namespace Popfasd\Ninja;
 
 use MattFerris\Di\ContainerInterface;
-use MattFerris\HttpRouting\RequestInterface;
-use MattFerris\HttpRouting\Response;
+use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response;
+use Kispiox\Controller as KispioxController;
 
-class Controller
+class Controller extends KispioxController
 {
-    /**
-     * @var ContainerInterface $di
-     */
-    protected $di;
-
-    /**
-     * @param ContainerInterface $di
-     */
-    public function __construct(ContainerInterface $di)
-    {
-        $this->di = $di;
-    }
-
     /**
      * @param array $url
      */
@@ -68,22 +68,23 @@ class Controller
     }
 
     /**
-     * @param RequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      */
-    public function getSubmitAction(RequestInterface $request)
+    public function getSubmitAction(ServerRequestInterface $request)
     {
-        $response = new Response('This URI only accepts POST method', 405, 'text/plain');
-        $response->setHeader('Allow', 'POST');
+        $response = $this->textResponse('This URI only accepts POST method');
         return $response;
     }
 
     /**
-     * @param RequestInterface $request
+     * @param \Psr\Htp\Message\ServerRequestInterface $request
      */
-    public function postSubmitAction(RequestInterface $request)
+    public function postSubmitAction(ServerRequestInterface $request)
     {
-        $referer = $request->getHeader('Referer');
-        $validationKey = $request->getAttribute('validationKey');
+        $config = $this->container->get('Config');
+
+        $referer = $request->getHeaderLine('Referer');
+        $validationKey = $config->get('app.validationKey');
 
         // if validation has already failed once, the form's URL will
         // include the validation details and therefore produce a new
@@ -105,7 +106,25 @@ class Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $form = new Form($request, $request->getAttribute('cacheDir'));
+        $referer = $request->getHeaderLine('Referer');
+        $formId = sha1($referer);
+
+        $form = new Form($formId, $referer, $request->getParsedBody());
+        $cache = $this->container->get('FormCache');
+
+        $settings = null;
+        if (!$cache->hasForm($formId)) {
+            $cache->addForm($form);
+        }
+        $settings = $cache->getForm($formId);
+
+        if ($settings->has('fields')) {
+            $form->setFields($settings->get('fields'));
+        }
+
+        if ($settings->has('validationRules')) {
+            $form->setValidationRules($settings->get('validationRules'));
+        }
 
         // validate the form, if it fails, redirect back to the form
         // URL with a base64 encoded JSON string in the query string
@@ -114,7 +133,7 @@ class Controller
             // build the base64 encoded json string
             $details = urlencode(base64_encode(json_encode($form->getValidationErrors())));
 
-            $url = parse_url($form->getUrl());
+            $url = parse_url($referer);
 
             $query = [];
             if (isset($url['query'])) {
@@ -125,9 +144,7 @@ class Controller
 
             $urlstr = $this->assembleUrl($url);
 
-            // generate the response to redirect the user back to the form URL
-            $response = new Response('Form failed validation', 303, 'text/plain');
-            $response->setHeader('Location', $urlstr);
+            $response = $this->redirectResponse($urlstr, 303);
 
             // by returning, we prevent anything else from running
             return $response;
@@ -135,16 +152,74 @@ class Controller
 
         $form->process();
 
-        $nexturl = $form->getNextUrl();
-        if (!isset($nexturl) || empty($nexturl)) {
-            $prefix = str_replace('/index.php', '', $request->getAttribute('uriPrefix'));
-            $nexturl = $prefix.'/public/thanks.html';
+        $nexturl = null;
+        if ($settings->has('nextUrl')) {
+            $nexturl = $settings->get('nextUrl');
         }
 
-        $response = new Response('Form submitted', 303, 'text/plain');
-        $response->setHeader('Location', $nexturl);
+        // if no nextUrl defined, use default
+        if (!isset($nexturl) || empty($nexturl)) {
+            $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
+            $path = $prefix.'public/thanks.html';
+            $uri = $request->getUri()->withPath($path);
+            $nexturl = (string)$uri;
+        }
+
+        $response = $this->redirectResponse($nexturl, 303);
 
         return $response;
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string $formId
+     */
+    public function getSubmissionsAction(ServerRequestInterface $request, $formId)
+    {
+        $cache = $this->container->get('FormCache');
+
+        if (!$cache->hasForm($formId)) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Form does not exist',
+                'debug' => 'form ID "'.$formId.'" does not exist in the cache'
+            ]);
+        }
+
+        try {
+            $settings = $cache->getForm($formId);
+            $form = new Form($formId, $settings->get('url'));            
+            $submissions = $cache->getSubmissionsByForm($form);
+        } catch (Exception $e) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Failed to retrieve form submissions',
+                'debug' => 'encountered exception "'.get_class($e).'" with '.$e->getMessage()
+            ]);
+        }
+
+        $config = $this->container->get('Config');
+        $uri = $request->getUri();
+        $formUri = $uri->withPath($config->get('app.uriPrefix').'/forms/'.$formId);
+        $formUri = $formUri->withQuery('');
+
+        foreach (array_keys($submissions) as $i) {
+            $submissions[$i] = $submissions[$i]->__toArray();
+        }
+
+        return $this->jsonResponse([
+            'status' => 'success',
+            'form' => $formUri->__toString(),
+            'submissions' => $submissions
+        ]);
+    }
+
+    /**
+     * @param \Psr\Htyp\Message\ServerRequestInterface $request
+     */
+    public function error404Action(ServerRequestInterface $request)
+    {
+        return $this->textResponse('page not found', 404);
     }
 }
 

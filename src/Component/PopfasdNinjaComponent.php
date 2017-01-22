@@ -4,7 +4,7 @@
  * ninja - sneaky HTML form processor
  * github.com/popfasd/ninja
  *
- * index.php
+ * PopfasdNinjaComponent.php
  * @copyright Copyright (c) 2016 POPFASD
  * @author Matt Ferris <mferris@fasdoutreach.ca>
  *
@@ -12,12 +12,10 @@
  * github.com/popfasd/ninja/blob/master/License.txt
  */
 
-require('vendor/autoload.php');
+namespace Popfasd\Ninja\Component;
 
-if (isset($_GET['q'])) {
-    $_SERVER['REQUEST_URI'] = $_GET['q'];
-    unset($_GET['q']);
+use MattFerris\Application\Component;
+
+class PopfasdNinjaComponent extends Component
+{
 }
-
-Kispiox\Kispiox::start();
-

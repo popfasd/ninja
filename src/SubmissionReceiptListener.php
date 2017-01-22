@@ -1,11 +1,36 @@
 <?php
 
+/**
+ * ninja - sneaky HTML form processor
+ * github.com/popfasd/ninja
+ *
+ * SubmissionReceiptListener.php
+ * @copyright Copyright (c) 2016 POPFASD
+ * @author Matt Ferris <mferris@fasdoutreach.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * github.com/popfasd/ninja/blob/master/License.txt
+ */
+
 namespace Popfasd\Ninja;
 
 use MattFerris\HttpRouting\RequestInterface;
 
 class SubmissionReceiptListener
 {
+    /**
+     * @var string
+     */
+    protected $cacheDir;
+
+    /**
+     * @param string $cacheDir
+     */
+    public function __construct($cacheDir)
+    {
+        $this->cacheDir = $cacheDir;
+    }
+
      /**
      * @param SubmissionProcessedEvent $event
      */
@@ -14,7 +39,7 @@ class SubmissionReceiptListener
         $submission = $event->getSubmission();
         $form = $submission->getForm();
 
-        $tplFile = $form->getCacheDir().'/receipt.tpl';
+        $tplFile = $this->cacheDir.'/'.$form->getId().'/receipt.tpl';
         if (!file_exists($tplFile)) {
             return;
         } 
