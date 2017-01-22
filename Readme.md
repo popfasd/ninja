@@ -6,13 +6,12 @@ inconspicously, is adaptable, and requires little instruction. After some simple
 configuration you can point any HTML form at Ninja and it will automatically
 start collecting submissions and notifying you by email of each submission.
 
-Edit `private/parameters.yaml`
+Copy `private/config/app.dist.yaml` to `private/config/app.yaml` and make sure
+the following values are set appropriately.
 
 ```yaml
 mailto: [ 'your@address.com] ]
 uriPrefix: '/path/to/ninja'
-cacheDir: 'private/cache'
-validationKey: '__nv'
 ```
 
 Now update your `form` tag's `action` and `method` attributes. Ninja only likes
@@ -25,29 +24,28 @@ POST requests.
 Each form is given an ID which is derived from the SHA1 hash of the form URL.
 All form data and configuration is stored in `private/cache/<id>` by default.
 The first time a form is submitted to Ninja, it creates the form's directory and
-drops a `settings.php` file in the directory which includes a PHP comment
-containing the form's URL. Submissions are stored in
-`private/cache/<id>/submissions.tsv`.
+drops a `settings.yaml` file in the directory which includes a key called `url`
+which containers the form's URL. Submissions are stored in
+`private/cache/<formId>/submissions` as serialized arrays.
 
 Friendly Field Names
 --------------------
 
 The fields in each submission are named after the field names submitted in the
 POST request. If you want to make these field names a little more human-
-friendly you can assign them in the `settings.php` file for the form. Add a
-`$fields` array with the submitted field name as the array key and the friendly
+friendly you can assign them in the `settings.yaml` file for the form. Add a
+`fields` key with the submitted field name as the array key and the friendly
 name as the key's value.
 
-```php
-$fields = [
-    'field1_firstName' => 'First name',
-    'street_addr' => 'Street address',
-    'zip_postal' => 'Zip/Postal code'
-];
+```yaml
+fields:
+    field1_firstName: 'First name'
+    street_addr: 'Street address'
+    zip_postal: 'Zip/Postal code'
 ```
 
-Keep in mind that once `$fields` is defined, Ninja will only collect information
-for the fields that have been defined. In this way, you can also use `$fields`
+Keep in mind that once `fields` is defined, Ninja will only collect information
+for the fields that have been defined. In this way, you can also use `fields`
 to filter out fields you don't want to collect.
 
 Say Thank You
@@ -56,10 +54,10 @@ Say Thank You
 By default users are redirected to Ninja's included "thank you" page
 `/path/to/ninja/public/thanks.html`. Ninja's don't care much for fancy things,
 and you may find Ninja's thank-you page a little too ausetre. Fortunately, you
-can change this using `$nexturl` in `settings.php`.
+can change this using `nexturl` in `settings.yaml`.
 
-```php
-$nexturl = 'http://example.com/super-awesome-thanks.html';
+```yaml
+nexturl: 'http://example.com/super-awesome-thanks.html'
 ```
 
 Ninja will redirect your users to your super-awesome thank-you page now.
@@ -106,14 +104,17 @@ Validation
 
 Just as a ninja must take care to strike at the right target, you too can ensure
 that your forms collect the right data. Validation rules can be added to
-`settings.php` to faciliate this. Rules consist of regular expressions which are
+`settings.yaml` to faciliate this. Rules consist of regular expressions which are
 applied to the corresponding field.
 
-```php
-$validationRules = [
-    'firstName' => true, // just check the field isn't empty
-    'postal' => '/[A-Z][0-9][A-Z]\s[0-9][A-Z][0-9]/' // check for valid Canadian postal code (i.e. A1A 1A1)
-];
+```yaml
+validationRules:
+
+    # make sure firstName is included
+    firstName: true
+
+    # check for valid Canadian postal code (i.e. A1A 1A1)
+    postal: '/[A-Z][0-9][A-Z]\s[0-9][A-Z][0-9]/'
 ```
 
 If a submission fails validation, the user is redirect back to the form, with
@@ -138,7 +139,7 @@ Ninja is wise, and will strip the validation results from the URL before
 processing.
 
 If `__nv` conflicts with other keys in your query string, you can change this to
-something else by changing `validationKey` in `private/parameters.yaml`.
+something else by changing `validationKey` in `private/config/app.yaml`.
 
 Contribute
 ----------
