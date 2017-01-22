@@ -38,7 +38,7 @@ class ApiController extends Controller
                 'status' => 'error',
                 'message' => 'Form does not exist',
                 'debug' => 'form ID "'.$formId.'" does not exist in the cache'
-            ]);
+            ], 404);
         }
 
         $settings = $cache->getForm($formId);
@@ -93,7 +93,7 @@ class ApiController extends Controller
                 'status' => 'error',
                 'message' => 'Form does not exist',
                 'debug' => 'form ID "'.$formId.'" does not exist in the cache'
-            ]);
+            ], 404);
         }
 
         try {
@@ -105,7 +105,7 @@ class ApiController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to retrieve form submissions',
                 'debug' => 'encountered exception "'.get_class($e).'" with '.$e->getMessage()
-            ]);
+            ], 500);
         }
 
         $config = $this->container->get('Config');
@@ -140,7 +140,7 @@ class ApiController extends Controller
                 'status' => 'error',
                 'message' => 'Form does not exist',
                 'debug' => 'form ID "'.$formId.'" does not exist in the cache'
-            ]);
+            ], 404);
         }
 
         $submissions = [];
@@ -153,7 +153,7 @@ class ApiController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to retrieve form submissions',
                 'debug' => 'encountered exception "'.get_class($e).'" with '.$e->getMessage()
-            ]);
+            ], 500);
         }
 
         $response = (new Response())->withHeader('content-type', $exporter->getMimeType());
