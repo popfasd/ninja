@@ -30,7 +30,7 @@ GET /api/forms
 ```
 
 Key    | Type   | Contents
---------------------------
+-------|--------|---------
 status | string | `success` or `failure`
 href   | string | The current endpoint URI
 forms  | object | An object containing keys for each form
@@ -46,15 +46,15 @@ GET /api/forms/{formId}
 ```
 
 Key    | Type   | Contents
---------------------------
+-------|--------|---------
 status | string | `success` or `failure`
 href   | string | The current endpoint URI
 form   | object | An object containing all the form attributes
 
 Form attributes:
 
-Key    | Type   | Contents
---------------------------
+Key         | Type   | Contents
+------------|--------|---------
 id          | string | The form ID
 url         | string | The form URI
 submissions | string | The API URI for accessing the form's submissions
@@ -67,7 +67,7 @@ GET /api/forms/{formId}/submissions
 ```
 
 Key         | Type   | Contents
--------------------------------
+------------|--------|---------
 status      | string | `success` or `failure`
 href        | string | The current endpoint URI
 form        | string | The API URI for accessing form details
