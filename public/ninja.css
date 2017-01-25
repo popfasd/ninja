@@ -75,7 +75,7 @@ section.page {
     background: #bdf;
 }
 
-.flash p.notice {
+.flash p.error {
     background: #fbb;
 }
 
