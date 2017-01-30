@@ -17,9 +17,9 @@ namespace Popfasd\Ninja;
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
-use Kispiox\Controller;
+use Kispiox\Controller as KispioxController;
 
-class ApiController extends Controller
+class ApiController extends KispioxController
 {
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
