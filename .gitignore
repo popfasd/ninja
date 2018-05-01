@@ -1,5 +1,4 @@
 composer.phar
-composer.lock
 private/cache/*/*
 private/config/users.yaml
 vendor/
