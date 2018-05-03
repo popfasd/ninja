@@ -78,6 +78,46 @@ ninja.endpoint = function (uri) {
 };
 
 /*
+ * Render the dashboard view
+ */
+ninja.dashboard = function(view) {
+    view.show();
+};
+
+/*
+ * Render the domain key generation view
+ */
+ninja.gendomkey = function(view) {
+
+    var successFn = function (data) {
+        view.find('#domkey').text(data.token);
+    };
+
+    var failureFn = function (resp) {
+        if (resp.status == 400) {
+            ninja.flash(resp.responseJSON.message, 'error');
+        } else {
+            ninja.flash('An error occured', 'error');
+        }
+    };
+
+    view.find('form').submit(function (e) {
+        e.stopPropagation();
+
+        $.post(ninja.getApiBase() + '/key', view.find('form').serialize())
+            .done(successFn)
+            .fail(failureFn);
+
+        return false;
+    });
+
+    var apiuri = ninja.getApiBase() + '/key';
+    ninja.endpoint('GET ' + apiuri);
+
+    view.show();
+};
+
+/*
  * Render the forms view
  */
 ninja.forms = function (view) {
@@ -184,12 +224,20 @@ ninja.do = function (id, args) {
             ninja.login($('#'+id), args);
             break;
 
+        case "gendomkey":
+            ninja.gendomkey($('#'+id), args);
+            break;
+
+        case "forms":
+            ninja.forms($('#'+id), args);
+            break;
+
         case "submissions":
             ninja.submissions($('#'+id), args);
             break;
 
         default:
-            ninja.forms($('#forms'), args);
+            ninja.dashboard($('#dashboard'), args);
             break;
     }
 
@@ -200,7 +248,7 @@ ninja.do = function (id, args) {
  */
 $(document).ready(function () {
 
-    ninja.do('forms');
+    ninja.do('dashboard');
 
     $('section.page').on('click', 'a', function (e) {
         e.preventDefault();

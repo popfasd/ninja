@@ -24,6 +24,11 @@ routes:
         path:   '/api'
         action: 'Kispiox\Authentication\AuthController:verifyAction'
 
+    api_generate_key:
+        path:   '/api/key'
+        method: 'POST'
+        action: 'Popfasd\Ninja\ApiController:generateKeyAction'
+
     api_list_submissions:
         path:   '/api/forms/{formId}/submissions'
         method: 'GET'

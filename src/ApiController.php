@@ -18,9 +18,45 @@ use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Kispiox\Controller as KispioxController;
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 class ApiController extends KispioxController
 {
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     */
+    public function generateKeyAction(ServerRequestInterface $request)
+    {
+        $config = $this->container->get('Config');
+
+        $params = $request->getParsedBody();
+
+        if (!array_key_exists('domain', $params) || empty($params['domain'])) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'No domain specified',
+                'debug' => 'failed to generate key, no domain specified'
+            ], 400);
+        }
+
+        if (!$config->has('app.auth.key')) {
+            throw new RuntimeException('app.auth.key is not set');
+        }
+
+        $token = (new Builder())
+            ->setIssuedAt(time())
+            ->set('domain', $params['domain'])
+            ->sign(new Sha256(), $config->get('app.auth.key'))
+            ->getToken();
+
+        return $this->jsonResponse([
+            'status' => 'success',
+            'href' => $request->getUri()->__toString(),
+            'token' => (string)$token
+        ]);
+    }
+
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      */

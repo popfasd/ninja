@@ -17,7 +17,7 @@
     <section class="page" id="login">
       <header><h1>Login</h1></header>
       <section class="content">
-        <form id="testForm" method="post">
+        <form id="loginForm" method="post">
           <div>
             <label for="user">Username</label>
             <input type="text" id="user" name="user">
@@ -32,9 +32,22 @@
     </section>
     <!-- / login form -->
 
+    <!-- dashboard -->
+    <section class="page" id="dashboard">
+      <header><h1>Dashboard</h1></header>
+      <section class="content">
+        <ul>
+          <li><a href="forms">List Forms</li>
+          <li><a href="gendomkey">Generate Domain Key</li>
+        </ul>
+      </section>
+    </section>
+    <!-- / dashboard -->
+
     <!-- forms listing -->
     <section class="page" id="forms">
       <header>
+        <nav class="page-header-left"><a href="dashboard">Dashboard</a></nav>
         <h1>Forms</h1>
       </header>
       <section class="content">
@@ -61,6 +74,25 @@
       </section>
     </section>
     <!-- / submissions listing -->
+
+    <!-- generate domain key -->
+    <section class="page" id="gendomkey">
+      <header>
+        <nav class="page-header-left"><a href="dashboard">Dashboard</a></nav>
+        <h1>Generate Domain Key</h1>
+      </header>
+      <section class="content">
+        <form id="domkeyform" method="post">
+          <div>
+            <label for="domain">Domain</label>
+            <input type="text" id="domain" name="domain">
+          </div>
+          <input type="submit" value="Submit">
+        </form>
+        <p id="domkey"></p>
+      </section>
+    </section>
+    <!-- / generate domain key -->
 
     <footer><p><span id="api-endpoint"></span></footer>
 
