@@ -40,7 +40,7 @@ class AdminNotifyListener
         $submission = $event->getSubmission();
         $form = $submission->getForm();
 
-        $body = 'Submitted via '.$form->getUrl()."\n\n";
+        $body = 'Submitted via '.$form->getDomain().':'.$form->getName()."\n\n";
 
         foreach ($submission->getData() as $key => $value) {
             $body .= $form->getFieldTitle($key).":\n$value\n\n";
@@ -48,7 +48,7 @@ class AdminNotifyListener
 
         // send emails to listed recipients
         foreach ($this->mailto as $addr) {
-            mail($addr, 'ninja: '.$form->getUrl(), $body);
+            mail($addr, 'ninja: '.$form->getDomain().':'.$form->getName(), $body);
         }
     }
 }

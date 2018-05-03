@@ -16,8 +16,12 @@ namespace Popfasd\Ninja;
 
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Request;
 use Zend\Diactoros\Response;
 use Kispiox\Controller as KispioxController;
+use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\ValidationData;
 
 class Controller extends KispioxController
 {
@@ -83,6 +87,25 @@ class Controller extends KispioxController
     {
         $config = $this->container->get('Config');
 
+        $keyField = '__nfk';
+        if ($config->has('app.formKeyFieldName')) {
+            $keyField = $config->get('app.formKeyFieldName');
+        }
+
+        // check if form key provided
+        $fields = $request->getParsedBody();
+        if (!array_key_exists($keyField, $fields)) {
+            return $this->textResponse('Missing form key', 401);
+        }
+
+        // validate form key
+        $token = (new Parser)->parse($fields[$keyField]);
+        if (is_null($token) || !$token->verify(new Sha256(), $config->get('app.auth.key'))) {
+            return $this->textResponse('Invalid form key', 401);
+        }
+
+        unset($fields[$keyField]);
+
         $referer = $request->getHeaderLine('Referer');
         $validationKey = $config->get('app.validationKey');
 
@@ -106,10 +129,39 @@ class Controller extends KispioxController
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $referer = $request->getHeaderLine('Referer');
-        $formId = sha1($referer);
+        // verify domain and name claims
 
-        $form = new Form($formId, $referer, $request->getParsedBody());
+        if (!$token->hasClaim('domain')) {
+            return $this->textResponse('Missing domain claim in form key');
+        }
+
+        if (!$token->hasClaim('name')) {
+            return $this->textResponse('Missing form name claim in form key');
+        }
+
+        $domain = $token->getClaim('domain');
+        $name = $token->getClaim('name');
+
+        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $domain)) {
+            return $this->textResponse('Invalid domain in form key');
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9-_]+$/', $name)) {
+            return $this->textResponse('Invalid form name in form key');
+        }
+
+        // verify referrer domain matches form key domain
+        $refererDomain = (new Request($referer))
+            ->getUri()
+            ->getHost();
+
+        if ($refererDomain !== $domain) {
+            return $this->textResponse('Referer domain doesn\'t match domain claim in form key', 401);
+        }
+
+        $formId = sha1($domain.':'.$name);
+        $form = new Form($formId, $domain, $name, $fields);
+
         $cache = $this->container->get('FormCache');
 
         $settings = null;

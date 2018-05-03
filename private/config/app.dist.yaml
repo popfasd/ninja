@@ -23,6 +23,9 @@ uriPrefix: /
 # the query string key that contains validation results (defaults to '__nv')
 validationKey: __nv
 
+# the field name containing the form key (defaults to '__nfk')
+formKeyFieldName: __nfk
+
 # the path to the cache directory (default is 'private/cache')
 cacheDir: private/cache
 

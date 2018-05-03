@@ -40,6 +40,30 @@ class ApiController extends KispioxController
             ], 400);
         }
 
+        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $params['domain'])) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Invalid domain specified',
+                'debug' => 'domain contains invalid characters'
+            ], 400);
+        }
+
+        if (!array_key_exists('name', $params) || empty($params['name'])) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'No form name specified',
+                'debug' => 'failed to generate key, no form name specified'
+            ], 400);
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9-_]+$/', $params['name'])) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Invalid form name specified',
+                'debug' => 'form name contains invalid characters'
+            ], 400);
+        }
+
         if (!$config->has('app.auth.key')) {
             throw new RuntimeException('app.auth.key is not set');
         }
@@ -47,6 +71,7 @@ class ApiController extends KispioxController
         $token = (new Builder())
             ->setIssuedAt(time())
             ->set('domain', $params['domain'])
+            ->set('name', $params['name'])
             ->sign(new Sha256(), $config->get('app.auth.key'))
             ->getToken();
 
@@ -106,7 +131,7 @@ class ApiController extends KispioxController
         $forms = $cache->getForms();
         $jsonForms = [];
         foreach ($forms as $form) {
-            $jsonForms[$form->getId()] = $apiUrl->__toString().$form->getId();
+            $jsonForms[$form->getId()] = $form->getDomain().' : '.$form->getName();
         }
 
         return $this->jsonResponse([
@@ -134,7 +159,7 @@ class ApiController extends KispioxController
 
         try {
             $settings = $cache->getForm($formId);
-            $form = new Form($formId, $settings->get('url'));            
+            $form = new Form($formId, $settings->get('domain'), $settings->get('name'));            
             $submissions = $cache->getSubmissionsByForm($form);
         } catch (Exception $e) {
             return $this->jsonResponse([
@@ -182,7 +207,7 @@ class ApiController extends KispioxController
         $submissions = [];
         try {
             $settings = $cache->getForm($formId);
-            $form = new Form($formId, $settings->get('url'));
+            $form = new Form($formId, $settings->get('domain'), $settings->get('name'));
             $submissions = $cache->getSubmissionsByForm($form);
         } catch (Exception $e) {
             return $this->jsonResponse([

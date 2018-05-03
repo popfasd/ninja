@@ -94,7 +94,9 @@ ninja.gendomkey = function(view) {
     };
 
     var failureFn = function (resp) {
-        if (resp.status == 400) {
+        if (resp.status == 401) {
+            ninja.do('login', 'submissions');
+        } else if (resp.status == 400) {
             ninja.flash(resp.responseJSON.message, 'error');
         } else {
             ninja.flash('An error occured', 'error');
@@ -127,8 +129,8 @@ ninja.forms = function (view) {
         list.empty();
 
         for (var id in data.forms) {
-            var url = data.forms[id];
-            list.append('<li><a data-form-id="' + id + '" href="submissions">' + url + '</a></li>');
+            var domname = data.forms[id];
+            list.append('<li><a data-form-id="' + id + '" href="submissions">' + domname + '</a></li>');
         }
 
         view.show();
@@ -190,7 +192,9 @@ ninja.submissions = function (view, args) {
     };
 
     var failureFn = function (resp) {
-
+        if (resp.status == 401) {
+            ninja.do('login', 'submissions');
+        }
     };
 
 

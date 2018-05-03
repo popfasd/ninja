@@ -26,7 +26,12 @@ class Form
     /**
      * @var string
      */
-    protected $url;
+    protected $domain;
+
+    /**
+     * @var string
+     */
+    protected $name;
 
     /**
      * @var array
@@ -55,13 +60,15 @@ class Form
 
     /**
      * @param string $id
-     * @param string $url
+     * @param string $domain
+     * @param string $name
      * @param array $data
      */
-    public function __construct($id, $url, array $data = [])
+    public function __construct($id, $domain, $name, array $data = [])
     {
         $this->id = $id;
-        $this->url = $url;
+        $this->domain = $domain;
+        $this->name = $name;
         $this->data = $data;
     }
 
@@ -76,9 +83,17 @@ class Form
     /**
      * @return string
      */
-    public function getUrl()
+    public function getDomain()
     {
-        return $this->url;
+        return $this->domain;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
