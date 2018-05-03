@@ -25,7 +25,7 @@ class ErrorController extends Controller
      */
     public function error405Action(ServerRequestInterface $request, array $methods)
     {
-        $response = $this->textResponse('This URI only accepts POST method')
+        $response = $this->textResponse('This URI only accepts POST method', 405)
             ->withHeader('Allow', strtoupper(implode($methods, ',')));
         return $response;
     }

@@ -5,11 +5,6 @@
 #
 routes:
 
-    get_submit:
-        path:   '/submit'
-        method: 'GET'
-        action: 'Popfasd\Ninja\Controllers\ErrorController:error405Action'
-
     api_token_verify:
         path:   '/submit'
         method: 'POST'
@@ -19,6 +14,11 @@ routes:
         path:   '/submit'
         method: 'POST'
         action: 'Popfasd\Ninja\Controllers\SubmissionController:postSubmitAction'
+
+    error_405_submit:
+        path:   '/submit'
+        action: 'Popfasd\Ninja\Controllers\ErrorController:error405Action'
+        defaults: { methods: [ 'POST' ] }
 
     api_auth:
         path:   '/api/auth'
