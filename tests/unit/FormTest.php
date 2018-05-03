@@ -11,14 +11,16 @@ class FormTest extends PHPUnit_Framework_TestCase
 
     public function testConstruct()
     {
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = ['foo' => 'bar'];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
 
         $this->assertEquals($form->getId(), $id);
-        $this->assertEquals($form->getUrl(), 'foo');
+        $this->assertEquals($form->getHost(), 'foo');
+        $this->assertEquals($form->getName(), 'bar');
         $this->assertNull($form->getFields());
         $this->assertNull($form->getValidationErrors());
 
@@ -31,9 +33,10 @@ class FormTest extends PHPUnit_Framework_TestCase
      */
     public function testSetEmptyValidationKey()
     {
-        $url = 'foo';
-        $id = sha1($url);
-        $form = new Form($id, $url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
+        $form = new Form($id, $host, $name);
         $form->setValidationKey('');
     }
 
@@ -42,11 +45,12 @@ class FormTest extends PHPUnit_Framework_TestCase
      */
     public function testValidate()
     {
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = ['field1' => 'test'];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
 
         $this->assertTrue($form->validate());
         $this->assertNull($form->getValidationErrors());
@@ -57,12 +61,13 @@ class FormTest extends PHPUnit_Framework_TestCase
      */
     public function testValidateWithNotReceivedField()
     {
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = [];
         $rules = ['field1' => true];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
         $form->setValidationRules($rules);
 
         $this->assertFalse($form->validate());
@@ -74,12 +79,13 @@ class FormTest extends PHPUnit_Framework_TestCase
      */
     public function testValidateWithEmptyField()
     {
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = ['field1' => ''];
         $rules = ['field1' => true];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
         $form->setValidationRules($rules);
 
         $this->assertFalse($form->validate());
@@ -91,12 +97,13 @@ class FormTest extends PHPUnit_Framework_TestCase
      */
     public function testValidateWithInvalidField()
     {
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = ['field1' => 'bar'];
         $rules = ['field1' => '/foo/'];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
         $form->setValidationRules($rules);
 
         $this->assertFalse($form->validate());
@@ -115,11 +122,12 @@ class FormTest extends PHPUnit_Framework_TestCase
 
         DomainEvents::setDispatcher($dispatcher);
 
-        $url = 'foo';
-        $id = sha1($url);
+        $host = 'foo';
+        $name = 'bar';
+        $id = sha1($host.'$'.$name);
         $data = ['foo' => 'bar'];
 
-        $form = new Form($id, $url, $data);
+        $form = new Form($id, $host, $name, $data);
         $this->assertInstanceOf(Submission::class, $form->process());
     }
 }

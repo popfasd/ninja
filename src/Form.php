@@ -26,7 +26,7 @@ class Form
     /**
      * @var string
      */
-    protected $domain;
+    protected $host;
 
     /**
      * @var string
@@ -60,14 +60,14 @@ class Form
 
     /**
      * @param string $id
-     * @param string $domain
+     * @param string $host
      * @param string $name
      * @param array $data
      */
-    public function __construct($id, $domain, $name, array $data = [])
+    public function __construct($id, $host, $name, array $data = [])
     {
         $this->id = $id;
-        $this->domain = $domain;
+        $this->host = $host;
         $this->name = $name;
         $this->data = $data;
     }
@@ -83,9 +83,9 @@ class Form
     /**
      * @return string
      */
-    public function getDomain()
+    public function getHost()
     {
-        return $this->domain;
+        return $this->host;
     }
 
     /**

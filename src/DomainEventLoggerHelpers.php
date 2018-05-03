@@ -23,7 +23,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
         $submission = $e->getSubmission();
         $form = $submission->getForm();
 
-        return 'processed submission ('.$submission->getId().') for ['.$form->getDomain().':'.$form->getName().'] ('.$form->getId().')';
+        return 'processed submission ('.$submission->getId().') for ['.$form->getHost().':'.$form->getName().'] ('.$form->getId().')';
     }
 }
 

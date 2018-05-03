@@ -38,7 +38,7 @@
       <section class="content">
         <ul>
           <li><a href="forms">List Forms</li>
-          <li><a href="gendomkey">Generate Domain Key</li>
+          <li><a href="gendomkey">Generate API Token</li>
         </ul>
       </section>
     </section>
@@ -75,17 +75,17 @@
     </section>
     <!-- / submissions listing -->
 
-    <!-- generate domain key -->
-    <section class="page" id="gendomkey">
+    <!-- generate API token -->
+    <section class="page" id="genapitok">
       <header>
         <nav class="page-header-left"><a href="dashboard">Dashboard</a></nav>
-        <h1>Generate Domain Key</h1>
+        <h1>Generate API Token</h1>
       </header>
       <section class="content">
-        <form id="domkeyform" method="post">
+        <form id="apitokform" method="post">
           <div>
-            <label for="domain">Domain</label>
-            <input type="text" id="domain" name="domain">
+            <label for="host">Host</label>
+            <input type="text" id="host" name="host">
           </div>
           <div>
             <label for="name">Form Name</label>
@@ -93,10 +93,10 @@
           </div>
           <input type="submit" value="Submit">
         </form>
-        <p id="domkey"></p>
+        <p id="apitok"></p>
       </section>
     </section>
-    <!-- / generate domain key -->
+    <!-- / generate API token -->
 
     <footer><p><span id="api-endpoint"></span></footer>
 

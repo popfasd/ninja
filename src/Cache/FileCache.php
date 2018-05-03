@@ -64,7 +64,7 @@ class FileCache implements CacheInterface
         }
 
         if (count($settings) === 0) {
-            $settings['domain'] = $form->getDomain();
+            $settings['host'] = $form->getHost();
             $settings['name'] = $form->getName();
         }
 
@@ -112,7 +112,7 @@ class FileCache implements CacheInterface
 
             $settings = $this->getForm($f);
 
-            $forms[] = new Form($f, $settings->get('domain'), $settings->get('name'));
+            $forms[] = new Form($f, $settings->get('host'), $settings->get('name'));
         }
         closedir($dh);
 

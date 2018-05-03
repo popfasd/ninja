@@ -4,7 +4,7 @@
  * ninja - sneaky HTML form processor
  * github.com/popfasd/ninja
  *
- * Controller.php
+ * Controllers/SubmissionController.php
  * @copyright Copyright (c) 2016 POPFASD
  * @author Matt Ferris <mferris@fasdoutreach.ca>
  *
@@ -12,18 +12,17 @@
  * github.com/popfasd/ninja/blob/master/License.txt
  */
 
-namespace Popfasd\Ninja;
+namespace Popfasd\Ninja\Controllers;
 
+use Popfasd\Ninja\Form;
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Request;
 use Zend\Diactoros\Response;
-use Kispiox\Controller as KispioxController;
+use Kispiox\Controller;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
 
-class Controller extends KispioxController
+class SubmissionController extends Controller
 {
     /**
      * @param array $url
@@ -72,39 +71,23 @@ class Controller extends KispioxController
     }
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     */
-    public function getSubmitAction(ServerRequestInterface $request)
-    {
-        $response = $this->textResponse('This URI only accepts POST method');
-        return $response;
-    }
-
-    /**
      * @param \Psr\Htp\Message\ServerRequestInterface $request
      */
     public function postSubmitAction(ServerRequestInterface $request)
     {
         $config = $this->container->get('Config');
 
-        $keyField = '__nfk';
-        if ($config->has('app.formKeyFieldName')) {
-            $keyField = $config->get('app.formKeyFieldName');
+        $tokField = '__nat';
+        if ($config->has('app.apiTokenFieldName')) {
+            $tokField = $config->get('app.apiTokenFieldName');
         }
 
-        // check if form key provided
         $fields = $request->getParsedBody();
-        if (!array_key_exists($keyField, $fields)) {
-            return $this->textResponse('Missing form key', 401);
-        }
-
-        // validate form key
-        $token = (new Parser)->parse($fields[$keyField]);
-        if (is_null($token) || !$token->verify(new Sha256(), $config->get('app.auth.key'))) {
-            return $this->textResponse('Invalid form key', 401);
-        }
-
+        $token = (new Parser)->parse($fields[$tokField]);
         unset($fields[$keyField]);
+
+        $host = $token->getClaim('host');
+        $fname = $token->getClaim('fname');
 
         $referer = $request->getHeaderLine('Referer');
         $validationKey = $config->get('app.validationKey');
@@ -129,38 +112,8 @@ class Controller extends KispioxController
             $request = $request->withHeader('Referer', $referer);
         }
 
-        // verify domain and name claims
-
-        if (!$token->hasClaim('domain')) {
-            return $this->textResponse('Missing domain claim in form key');
-        }
-
-        if (!$token->hasClaim('name')) {
-            return $this->textResponse('Missing form name claim in form key');
-        }
-
-        $domain = $token->getClaim('domain');
-        $name = $token->getClaim('name');
-
-        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $domain)) {
-            return $this->textResponse('Invalid domain in form key');
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9-_]+$/', $name)) {
-            return $this->textResponse('Invalid form name in form key');
-        }
-
-        // verify referrer domain matches form key domain
-        $refererDomain = (new Request($referer))
-            ->getUri()
-            ->getHost();
-
-        if ($refererDomain !== $domain) {
-            return $this->textResponse('Referer domain doesn\'t match domain claim in form key', 401);
-        }
-
-        $formId = sha1($domain.':'.$name);
-        $form = new Form($formId, $domain, $name, $fields);
+        $formId = sha1($host.'$'.$fname);
+        $form = new Form($formId, $host, $fname, $fields);
 
         $cache = $this->container->get('FormCache');
 
@@ -220,14 +173,6 @@ class Controller extends KispioxController
         $response = $this->redirectResponse($nexturl, 303);
 
         return $response;
-    }
-
-    /**
-     * @param \Psr\Htyp\Message\ServerRequestInterface $request
-     */
-    public function error404Action(ServerRequestInterface $request)
-    {
-        return $this->textResponse('page not found', 404);
     }
 }
 

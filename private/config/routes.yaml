@@ -8,12 +8,17 @@ routes:
     get_submit:
         path:   '/submit'
         method: 'GET'
-        action: 'Popfasd\Ninja\Controller:getSubmitAction'
+        action: 'Popfasd\Ninja\Controllers\ErrorController:error405Action'
+
+    api_token_verify:
+        path:   '/submit'
+        method: 'POST'
+        action: 'Popfasd\Ninja\Controllers\ApiTokenController:verifyAction'
 
     post_submit:
         path:   '/submit'
         method: 'POST'
-        action: 'Popfasd\Ninja\Controller:postSubmitAction'
+        action: 'Popfasd\Ninja\Controllers\SubmissionController:postSubmitAction'
 
     api_auth:
         path:   '/api/auth'
@@ -24,31 +29,31 @@ routes:
         path:   '/api'
         action: 'Kispiox\Authentication\AuthController:verifyAction'
 
-    api_generate_key:
-        path:   '/api/key'
+    api_generate_token:
+        path:   '/api/token'
         method: 'POST'
-        action: 'Popfasd\Ninja\ApiController:generateKeyAction'
+        action: 'Popfasd\Ninja\Controllers\ApiController:generateTokenAction'
 
     api_list_submissions:
         path:   '/api/forms/{formId}/submissions'
         method: 'GET'
-        action: 'Popfasd\Ninja\ApiController:getSubmissionsAction'
+        action: 'Popfasd\Ninja\Controllers\ApiController:getSubmissionsAction'
 
     api_export_form:
         path:   '/api/forms/{formId}/export'
         method: 'GET'
-        action: 'Popfasd\Ninja\ApiController:getExportAction'
+        action: 'Popfasd\Ninja\Controllers\ApiController:getExportAction'
 
     api_get_form:
         path:   '/api/forms/{formId}'
         method: 'GET'
-        action: 'Popfasd\Ninja\ApiController:getFormAction'
+        action: 'Popfasd\Ninja\Controllers\ApiController:getFormAction'
 
     api_list_forms:
         path:   '/api/forms'
         method: 'GET'
-        action: 'Popfasd\Ninja\ApiController:getFormsAction'
+        action: 'Popfasd\Ninja\Controllers\ApiController:getFormsAction'
 
     error_404:
         path:   '/'
-        action: 'Popfasd\Ninja\Controller:error404Action'
+        action: 'Popfasd\Ninja\Controllers\ErrorController:error404Action'

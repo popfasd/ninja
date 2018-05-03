@@ -85,17 +85,17 @@ ninja.dashboard = function(view) {
 };
 
 /*
- * Render the domain key generation view
+ * Render the API token generation view
  */
-ninja.gendomkey = function(view) {
+ninja.genapitok = function(view) {
 
     var successFn = function (data) {
-        view.find('#domkey').text(data.token);
+        view.find('#apitok').text(data.token);
     };
 
     var failureFn = function (resp) {
         if (resp.status == 401) {
-            ninja.do('login', 'submissions');
+            ninja.do('login', 'genapitok');
         } else if (resp.status == 400) {
             ninja.flash(resp.responseJSON.message, 'error');
         } else {
@@ -129,8 +129,8 @@ ninja.forms = function (view) {
         list.empty();
 
         for (var id in data.forms) {
-            var domname = data.forms[id];
-            list.append('<li><a data-form-id="' + id + '" href="submissions">' + domname + '</a></li>');
+            var name = data.forms[id];
+            list.append('<li><a data-form-id="' + id + '" href="submissions">' + name + '</a></li>');
         }
 
         view.show();
@@ -229,7 +229,7 @@ ninja.do = function (id, args) {
             break;
 
         case "gendomkey":
-            ninja.gendomkey($('#'+id), args);
+            ninja.genapitok($('#'+id), args);
             break;
 
         case "forms":

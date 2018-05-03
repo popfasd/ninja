@@ -4,7 +4,7 @@
  * ninja - sneaky HTML form processor
  * github.com/popfasd/ninja
  *
- * Controller.php
+ * Controllers/ApiController.php
  * @copyright Copyright (c) 2016 POPFASD
  * @author Matt Ferris <mferris@fasdoutreach.ca>
  *
@@ -12,39 +12,40 @@
  * github.com/popfasd/ninja/blob/master/License.txt
  */
 
-namespace Popfasd\Ninja;
+namespace Popfasd\Ninja\Controllers;
 
+use Popfasd\Ninja\Form;
 use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
-use Kispiox\Controller as KispioxController;
+use Kispiox\Controller;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 
-class ApiController extends KispioxController
+class ApiController extends Controller
 {
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      */
-    public function generateKeyAction(ServerRequestInterface $request)
+    public function generateTokenAction(ServerRequestInterface $request)
     {
         $config = $this->container->get('Config');
 
         $params = $request->getParsedBody();
 
-        if (!array_key_exists('domain', $params) || empty($params['domain'])) {
+        if (!array_key_exists('host', $params) || empty($params['host'])) {
             return $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'No domain specified',
-                'debug' => 'failed to generate key, no domain specified'
+                'message' => 'No host specified',
+                'debug' => 'failed to generate API token, no host specified'
             ], 400);
         }
 
-        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $params['domain'])) {
+        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $params['host'])) {
             return $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'Invalid domain specified',
-                'debug' => 'domain contains invalid characters'
+                'message' => 'Invalid host specified',
+                'debug' => 'host contains invalid characters'
             ], 400);
         }
 
@@ -52,7 +53,7 @@ class ApiController extends KispioxController
             return $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'No form name specified',
-                'debug' => 'failed to generate key, no form name specified'
+                'debug' => 'failed to generate API token, no form name specified'
             ], 400);
         }
 
@@ -70,7 +71,7 @@ class ApiController extends KispioxController
 
         $token = (new Builder())
             ->setIssuedAt(time())
-            ->set('domain', $params['domain'])
+            ->set('host', $params['host'])
             ->set('name', $params['name'])
             ->sign(new Sha256(), $config->get('app.auth.key'))
             ->getToken();
@@ -131,7 +132,7 @@ class ApiController extends KispioxController
         $forms = $cache->getForms();
         $jsonForms = [];
         foreach ($forms as $form) {
-            $jsonForms[$form->getId()] = $form->getDomain().' : '.$form->getName();
+            $jsonForms[$form->getId()] = $form->getHost().'::'.$form->getName();
         }
 
         return $this->jsonResponse([
@@ -159,7 +160,7 @@ class ApiController extends KispioxController
 
         try {
             $settings = $cache->getForm($formId);
-            $form = new Form($formId, $settings->get('domain'), $settings->get('name'));            
+            $form = new Form($formId, $settings->get('host'), $settings->get('name'));            
             $submissions = $cache->getSubmissionsByForm($form);
         } catch (Exception $e) {
             return $this->jsonResponse([
@@ -207,7 +208,7 @@ class ApiController extends KispioxController
         $submissions = [];
         try {
             $settings = $cache->getForm($formId);
-            $form = new Form($formId, $settings->get('domain'), $settings->get('name'));
+            $form = new Form($formId, $settings->get('host'), $settings->get('name'));
             $submissions = $cache->getSubmissionsByForm($form);
         } catch (Exception $e) {
             return $this->jsonResponse([
