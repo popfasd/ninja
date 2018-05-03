@@ -1,4 +1,5 @@
 composer.phar
 private/cache/*/*
+private/config/app.yaml
 private/config/users.yaml
 vendor/
