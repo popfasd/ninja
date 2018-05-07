@@ -158,12 +158,12 @@ class SubmissionController extends Controller
         $form->process();
 
         $nexturl = null;
-        if ($settings->has('nexturl')) {
-            $nexturl = $settings->get('nexturl');
+        if ($settings->has('nextUrl')) {
+            $nexturl = $settings->get('nextUrl');
         }
 
         // if no nextUrl defined, use default
-        if (!isset($nexturl) || empty($nexturl)) {
+        if (!isset($nexturl) || !is_null($nexturl) || empty($nexturl)) {
             $prefix = str_replace('/index.php', '', $config->get('app.uriPrefix'));
             $path = $prefix.'public/thanks.html';
             $uri = $request->getUri()->withPath($path);
