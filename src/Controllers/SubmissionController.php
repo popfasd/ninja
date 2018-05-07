@@ -158,8 +158,8 @@ class SubmissionController extends Controller
         $form->process();
 
         $nexturl = null;
-        if ($settings->has('nextUrl')) {
-            $nexturl = $settings->get('nextUrl');
+        if ($settings->has('nexturl')) {
+            $nexturl = $settings->get('nexturl');
         }
 
         // if no nextUrl defined, use default
