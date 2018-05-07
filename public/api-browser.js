@@ -106,7 +106,7 @@ ninja.genapitok = function(view) {
     view.find('form').submit(function (e) {
         e.stopPropagation();
 
-        $.post(ninja.getApiBase() + '/key', view.find('form').serialize())
+        $.post(ninja.getApiBase() + '/token', view.find('form').serialize())
             .done(successFn)
             .fail(failureFn);
 
@@ -228,7 +228,7 @@ ninja.do = function (id, args) {
             ninja.login($('#'+id), args);
             break;
 
-        case "gendomkey":
+        case "genapitok":
             ninja.genapitok($('#'+id), args);
             break;
 

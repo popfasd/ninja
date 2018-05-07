@@ -72,7 +72,7 @@ class ApiController extends Controller
         $token = (new Builder())
             ->setIssuedAt(time())
             ->set('host', $params['host'])
-            ->set('name', $params['name'])
+            ->set('fname', $params['name'])
             ->sign(new Sha256(), $config->get('app.auth.key'))
             ->getToken();
 

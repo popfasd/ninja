@@ -60,11 +60,11 @@ class ApiTokenController extends Controller
         $fname = $token->getClaim('fname');
 
         if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $host)) {
-            return $this->textResponse('Invalid host in API token');
+            return $this->textResponse('Invalid host in API token: '.$host);
         }
 
         if (!preg_match('/^[a-zA-Z0-9-_]+$/', $fname)) {
-            return $this->textResponse('Invalid fname in API token');
+            return $this->textResponse('Invalid fname in API token: '.$fname);
         }
 
         // verify referrer host matches API token host
