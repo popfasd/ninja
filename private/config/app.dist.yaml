@@ -23,6 +23,9 @@ uriPrefix: /
 # the query string key that contains validation results (defaults to '__nv')
 validationKey: __nv
 
+# whether API tokens are required with a submission (defaults to true)
+requireApiToken: true
+
 # the field name containing the API token (defaults to '__nat')
 apiTokenFieldName: __nat
 

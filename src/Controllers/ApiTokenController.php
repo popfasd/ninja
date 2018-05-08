@@ -19,8 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Response;
 use Kispiox\Controller;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Popfasd\Ninja\Authentication\ApiTokenRequest;
 
 class ApiTokenController extends Controller
 {
@@ -30,6 +29,11 @@ class ApiTokenController extends Controller
     public function verifyAction(ServerRequestInterface $request)
     {
         $config = $this->container->get('Config');
+
+        // return if tokens aren't required
+        if ($config->has('app.requireApiToken') && $config->get('app.requireApiToken') === false) {
+            return;
+        }
 
         $tokField = '__nat';
         if ($config->has('app.apiTokenFieldName')) {
@@ -43,21 +47,25 @@ class ApiTokenController extends Controller
         }
 
         // validate API token
-        $token = (new Parser)->parse($fields[$keyField]);
-        if (is_null($token) || !$token->verify(new Sha256(), $config->get('app.auth.key'))) {
-            return $this->textResponse('Invalid API token', 401);
+        $response = $this->container->get('Auth')->authenticate(
+            new ApiTokenRequest($fields[$tokField])
+        );
+        if (!$response->isValid()) {
+            return $this->textResponse('Authentication failed: "'.$response->getStatus().'"');
         }
 
-        if (!$token->hasClaim('host')) {
+        $claims = $response->getAttributes();
+
+        if (!array_key_exists('host', $claims)) {
             return $this->textResponse('Missing host claim in API token');
         }
 
-        if (!$token->hasClaim('fname')) {
+        if (!array_key_exists('fname', $claims)) {
             return $this->textResponse('Missing fname claim in API token');
         }
 
-        $host = $token->getClaim('host');
-        $fname = $token->getClaim('fname');
+        $host = $claims['host'];
+        $fname = $claims['fname'];
 
         if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $host)) {
             return $this->textResponse('Invalid host in API token: '.$host);
