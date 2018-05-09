@@ -33,23 +33,23 @@ class ApiController extends Controller
 
         $params = $request->getParsedBody();
 
-        if (!array_key_exists('host', $params) || empty($params['host'])) {
+        if (!array_key_exists('origin', $params) || empty($params['origin'])) {
             return $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'No host specified',
-                'debug' => 'failed to generate API token, no host specified'
+                'message' => 'No origin specified',
+                'debug' => 'failed to generate API token, no origin specified'
             ], 400);
         }
 
-        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $params['host'])) {
+        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $params['origin'])) {
             return $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'Invalid host specified',
-                'debug' => 'host contains invalid characters'
+                'message' => 'Invalid origin specified',
+                'debug' => 'origin contains invalid characters'
             ], 400);
         }
 
-        if (!array_key_exists('name', $params) || empty($params['name'])) {
+        if (!array_key_exists('fname', $params) || empty($params['fname'])) {
             return $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'No form name specified',
@@ -57,7 +57,7 @@ class ApiController extends Controller
             ], 400);
         }
 
-        if (!preg_match('/^[a-zA-Z0-9-_]+$/', $params['name'])) {
+        if (!preg_match('/^[a-zA-Z0-9-_]+$/', $params['fname'])) {
             return $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'Invalid form name specified',
@@ -71,8 +71,8 @@ class ApiController extends Controller
 
         $token = (new Builder())
             ->setIssuedAt(time())
-            ->set('host', $params['host'])
-            ->set('fname', $params['name'])
+            ->set('origin', $params['origin'])
+            ->set('fname', $params['fname'])
             ->sign(new Sha256(), $config->get('app.auth.key'))
             ->getToken();
 

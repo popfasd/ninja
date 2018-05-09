@@ -26,12 +26,12 @@ class Form
     /**
      * @var string
      */
-    protected $host;
+    protected $origin;
 
     /**
      * @var string
      */
-    protected $name;
+    protected $fname;
 
     /**
      * @var array
@@ -60,15 +60,15 @@ class Form
 
     /**
      * @param string $id
-     * @param string $host
-     * @param string $name
+     * @param string $origin
+     * @param string $fname
      * @param array $data
      */
-    public function __construct($id, $host, $name, array $data = [])
+    public function __construct($id, $origin, $fname, array $data = [])
     {
         $this->id = $id;
-        $this->host = $host;
-        $this->name = $name;
+        $this->origin = $origin;
+        $this->fname = $fname;
         $this->data = $data;
     }
 
@@ -83,17 +83,17 @@ class Form
     /**
      * @return string
      */
-    public function getHost()
+    public function getOrigin()
     {
-        return $this->host;
+        return $this->origin;
     }
 
     /**
      * @return string
      */
-    public function getName()
+    public function getFormName()
     {
-        return $this->name;
+        return $this->fname;
     }
 
     /**

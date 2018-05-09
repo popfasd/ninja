@@ -19,8 +19,6 @@ use MattFerris\Di\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Kispiox\Controller;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 class SubmissionController extends Controller
 {
@@ -77,18 +75,6 @@ class SubmissionController extends Controller
     {
         $config = $this->container->get('Config');
 
-        $tokField = '__nat';
-        if ($config->has('app.apiTokenFieldName')) {
-            $tokField = $config->get('app.apiTokenFieldName');
-        }
-
-        $fields = $request->getParsedBody();
-        $token = (new Parser)->parse($fields[$tokField]);
-        unset($fields[$keyField]);
-
-        $host = $token->getClaim('host');
-        $fname = $token->getClaim('fname');
-
         $referer = $request->getHeaderLine('Referer');
         $validationKey = $config->get('app.validationKey');
 
@@ -112,8 +98,11 @@ class SubmissionController extends Controller
             $request = $request->withHeader('Referer', $referer);
         }
 
-        $formId = sha1($host.'$'.$fname);
-        $form = new Form($formId, $host, $fname, $fields);
+        $origin = $request->getAttribute('origin');
+        $fname = $request->getAttribute('fname');
+
+        $formId = sha1($origin.'$'.$fname);
+        $form = new Form($formId, $origin, $fname, $fields);
 
         $cache = $this->container->get('FormCache');
 

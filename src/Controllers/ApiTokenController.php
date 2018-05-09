@@ -56,34 +56,38 @@ class ApiTokenController extends Controller
 
         $claims = $response->getAttributes();
 
-        if (!array_key_exists('host', $claims)) {
-            return $this->textResponse('Missing host claim in API token');
+        if (!array_key_exists('origin', $claims)) {
+            return $this->textResponse('Missing origin claim in API token');
         }
 
         if (!array_key_exists('fname', $claims)) {
             return $this->textResponse('Missing fname claim in API token');
         }
 
-        $host = $claims['host'];
+        $origin = $claims['origin'];
         $fname = $claims['fname'];
 
-        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $host)) {
-            return $this->textResponse('Invalid host in API token: '.$host);
+        if (!preg_match('/^[a-zA-Z0-9-\.]+$/', $origin)) {
+            return $this->textResponse('Invalid origin in API token: '.$host);
         }
 
         if (!preg_match('/^[a-zA-Z0-9-_]+$/', $fname)) {
             return $this->textResponse('Invalid fname in API token: '.$fname);
         }
 
-        // verify referrer host matches API token host
+        // verify referrer host matches API token origin
         $referer = $request->getHeaderLine('Referer');
         $refererHost = (new Request($referer))
             ->getUri()
             ->getHost();
 
-        if ($refererHost !== $host) {
-            return $this->textResponse('Referer host doesn\'t match host claim in API token', 401);
+        if ($refererHost !== $origin) {
+            return $this->textResponse('Referer doesn\'t match origin claim in API token', 401);
         }
+
+        return $request
+            ->withAttribute('origin', $origin)
+            ->withAttribute('fname', $fname);
     }
 }
 
